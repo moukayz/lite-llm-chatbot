@@ -1,0 +1,38 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# API Switching Guide
+
+This application can be configured to use different AI providers.
+
+## Currently Supported
+
+- Dashscope (Alibaba Cloud)
+- OpenAI (with configuration changes)
+
+## How to Switch to OpenAI
+
+1. Update [app/api/chat/route.ts](mdc:lite-llm-chatbot/app/api/chat/route.ts):
+```typescript
+const openai = new OpenAI({
+  apiKey: config.openaiApiKey,
+  // Remove or comment out the baseURL line
+});
+
+// And update the model name:
+const response = await openai.chat.completions.create({
+  model: 'gpt-3.5-turbo', // or another OpenAI model
+  // other parameters remain the same
+});
+```
+
+2. Ensure you have `OPENAI_API_KEY` in your `.env.local` file.
+
+## Adding Other Providers
+
+To add another provider:
+1. Add a new API key to `config.ts`
+2. Update `app/api/chat/route.ts` with the new provider details
+3. Update the README with setup instructions

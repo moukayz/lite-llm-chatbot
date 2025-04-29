@@ -1,0 +1,21 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Project Structure
+
+This is a Next.js-based chatbot application that integrates with AI APIs (OpenAI-compatible).
+
+## Main Files
+
+- [app/page.tsx](mdc:lite-llm-chatbot/app/page.tsx) - Main page component with chat interface
+- [app/layout.tsx](mdc:lite-llm-chatbot/app/layout.tsx) - Root layout component
+- [app/api/chat/route.ts](mdc:lite-llm-chatbot/app/api/chat/route.ts) - API route for chat completion
+- [app/config.ts](mdc:lite-llm-chatbot/app/config.ts) - Configuration for API keys
+
+## Project Organization
+
+- `/app` - Main Next.js app directory (App Router)
+- `/app/api` - API routes
+- `/public` - Static assets

@@ -1,103 +1,177 @@
-import Image from "next/image";
+'use client';
+
+import { useState, FormEvent, useRef, useEffect } from 'react';
+import { MessageContent } from './components/MessageContent';
+
+type Message = {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+};
+
+function normalizeMathMarkdown(markdown: string): string {
+  return markdown.replace(
+    /(^|[\n\r])\\\[(.*?)\\\]($|[\n\r])/gs,
+    (_, prefix, inside, suffix) => `${prefix}$$${inside}$$${suffix}`
+  );
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<Message[]>([
+    { role: 'system', content: 'You are a helpful assistant.' },
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading || isStreaming) return;
+
+    const userMessage: Message = { role: 'user', content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      // Add an empty assistant message that we'll stream content into
+      setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
+      setIsLoading(false);
+      setIsStreaming(true);
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response');
+      }
+
+      if (!response.body) {
+        throw new Error('Response body is null');
+      }
+
+      // Process the streaming response
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let accumulatedContent = '';
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+
+        if (value) {
+          const chunkText = decoder.decode(value);
+          const lines = chunkText
+            .split('\n\n')
+            .filter(line => line.startsWith('data: '))
+            .map(line => line.replace('data: ', ''));
+
+          for (const line of lines) {
+            if (line === '[DONE]') continue;
+            
+            try {
+              const { text } = JSON.parse(line);
+              if (text) {
+                accumulatedContent += text;
+                // Update the last message with the accumulated content
+                setMessages((prev) => {
+                  const newMessages = [...prev];
+                  newMessages[newMessages.length - 1].content = accumulatedContent;
+                  return newMessages;
+                });
+              }
+            } catch (err) {
+              console.error('Error parsing stream data:', err);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setMessages((prev) => {
+        // If we're streaming, update the last message
+        if (isStreaming) {
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1].content = 'Sorry, I encountered an error. Please try again.';
+          return newMessages;
+        }
+        // Otherwise add a new error message
+        return [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }];
+      });
+    } finally {
+      setIsLoading(false);
+      setIsStreaming(false);
+    }
+  };
+
+  return (
+    <main className="flex min-h-screen flex-col items-center p-4 sm:p-8 md:p-24 bg-gray-50">
+      <div className="z-10 max-w-5xl w-full flex flex-col items-center justify-between">
+        <h1 className="mb-8 text-3xl font-bold text-center">ChatBot</h1>
+
+        <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="h-[500px] overflow-y-auto p-4 flex flex-col gap-4">
+            {messages.slice(1).map((message, index) => (
+              <div
+                key={index}
+                className={`p-3 rounded-lg ${
+                  message.role === "user"
+                    ? "bg-blue-100 ml-auto max-w-[80%]"
+                    : "bg-gray-100 mr-auto max-w-[90%]"
+                }`}
+              >
+                <MessageContent
+                  role={message.role}
+                  content={normalizeMathMarkdown(message.content)}
+                  isStreaming={isStreaming}
+                />
+              </div>
+            ))}
+            {isLoading && (
+              <div className="bg-gray-100 p-3 rounded-lg mr-auto animate-pulse">
+                Thinking...
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <form onSubmit={handleSubmit} className="border-t p-4">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type your message..."
+                className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isLoading || isStreaming}
+              />
+              <button
+                type="submit"
+                disabled={isLoading || isStreaming || !input.trim()}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-blue-300"
+              >
+                Send
+              </button>
+            </div>
+          </form>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+    </main>
   );
 }

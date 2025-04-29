@@ -1,0 +1,41 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Setup Guide
+
+How to set up and run this chatbot application.
+
+## Prerequisites
+
+- Node.js installed
+- API keys for AI services (Dashscope and/or OpenAI)
+
+## Installation
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Create a `.env.local` file in the project root with:
+```
+DASH_SCOPE_API_KEY=your_dashscope_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here  # Optional
+```
+
+## Development
+
+Run the development server:
+```bash
+npm run dev
+```
+
+Access the application at http://localhost:3000
+
+## Files to Update
+
+- [README.md](mdc:lite-llm-chatbot/README.md) - Update to include Dashscope information
+- [app/config.ts](mdc:lite-llm-chatbot/app/config.ts) - Configure API keys
+- [app/api/chat/route.ts](mdc:lite-llm-chatbot/app/api/chat/route.ts) - Adjust API settings if needed

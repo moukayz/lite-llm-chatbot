@@ -1,0 +1,37 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# API Integration
+
+This application uses OpenAI-compatible APIs for AI chat functionality.
+
+## API Compatibility
+
+- The application is currently set up to use Dashscope (Alibaba Cloud's AI service) with OpenAI-compatible endpoints
+- It uses the OpenAI JS SDK but with a custom `baseURL` pointing to Dashscope
+
+## Key Code
+
+In [app/api/chat/route.ts](mdc:lite-llm-chatbot/app/api/chat/route.ts):
+
+```typescript
+const openai = new OpenAI({
+  apiKey: config.dashscopeApiKey,
+  baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+});
+```
+
+## Environment Variables
+
+Required in `.env.local`:
+- `DASH_SCOPE_API_KEY` - API key for Dashscope
+- `OPENAI_API_KEY` - Optional, if you want to switch to OpenAI
+
+## Model Configuration
+
+Current configuration uses:
+- Model: `qwen-plus` (Alibaba's model)
+- Temperature: 0.7
+- Max tokens: 500
