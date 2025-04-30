@@ -1,0 +1,9 @@
+export type Message = {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+};
+
+export type Model = {
+  name: string;
+  code: string;
+}; 

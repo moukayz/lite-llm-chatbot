@@ -5,9 +5,10 @@ import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight"; // optional for code highlight
 import "highlight.js/styles/github.css"; // or any style you like
 import "katex/dist/katex.min.css";
+import { Message } from '../types/chat';
 
 type MessageProps = {
-  role: "user" | "assistant" | "system";
+  role: Message['role'];
   content: string;
   isStreaming?: boolean;
 };

@@ -8,11 +8,12 @@ const openai = new OpenAI({
   baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
 });
 
-const model = 'qwen-max-latest';
+// Default model if none is provided
+const defaultModel = 'qwen-max';
 
 export async function POST(request: Request) {
   try {
-    const { messages } = await request.json();
+    const { messages, model } = await request.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -29,12 +30,16 @@ export async function POST(request: Request) {
       );
     }
 
+    // Use the provided model or fall back to the default
+    const modelToUse = model || defaultModel;
+    console.log(`Using model: ${modelToUse}`);
+
     // Create a streaming response
     const stream = await openai.chat.completions.create({
-      model: model,
+      model: modelToUse,
       messages,
       temperature: 0.7,
-      max_tokens: 500,
+      max_tokens: 2000,
       stream: true, // Enable streaming
     });
 
