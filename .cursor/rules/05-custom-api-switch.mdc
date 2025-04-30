@@ -3,36 +3,50 @@ description:
 globs: 
 alwaysApply: false
 ---
-# API Switching Guide
+# API Integration Guide
 
-This application can be configured to use different AI providers.
+This application supports multiple OpenAI-compatible AI providers.
 
-## Currently Supported
+## Supported API Types
 
-- Dashscope (Alibaba Cloud)
-- OpenAI (with configuration changes)
+- OpenAI API (openai.com)
+- Any OpenAI-compatible API endpoints (Azure, self-hosted, etc.)
 
-## How to Switch to OpenAI
+## Configuration Options
 
-1. Update [app/api/chat/route.ts](mdc:lite-llm-chatbot/app/api/chat/route.ts):
-```typescript
-const openai = new OpenAI({
-  apiKey: config.openaiApiKey,
-  // Remove or comment out the baseURL line
-});
+### Using the UI
 
-// And update the model name:
-const response = await openai.chat.completions.create({
-  model: 'gpt-3.5-turbo', // or another OpenAI model
-  // other parameters remain the same
-});
+The application includes a settings panel that allows:
+- Switching between API providers
+- Entering custom API keys
+- Setting custom base URLs
+- Adjusting model parameters
+
+### Using Environment Variables
+
+Set up API keys in `.env.local`:
+```
+OPENAI_API_KEY=your_openai_api_key_here
+CUSTOM_API_KEY=your_alternative_api_key_here
+CUSTOM_API_BASE_URL=https://your-api-endpoint.com
 ```
 
-2. Ensure you have `OPENAI_API_KEY` in your `.env.local` file.
+### Modifying Code
 
-## Adding Other Providers
+If you need to add support for a new API provider that requires custom implementation:
 
-To add another provider:
-1. Add a new API key to `config.ts`
-2. Update `app/api/chat/route.ts` with the new provider details
-3. Update the README with setup instructions
+1. Update [app/config.ts](mdc:lite-llm-chatbot/app/config.ts) to include new provider details
+2. Modify [app/api/chat/route.ts](mdc:lite-llm-chatbot/app/api/chat/route.ts) to handle the new API:
+   - Add authentication
+   - Adjust request formatting
+   - Handle response parsing differences
+3. Update [app/components/ChatSettings.tsx](mdc:lite-llm-chatbot/app/components/ChatSettings.tsx) to include UI options for the new provider
+
+## Model Parameters
+
+The application allows customizing parameters like:
+- Temperature
+- Maximum tokens
+- Top-p sampling
+- Frequency penalty
+- Presence penalty

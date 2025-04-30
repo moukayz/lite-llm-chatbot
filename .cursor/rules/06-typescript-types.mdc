@@ -1,0 +1,43 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# TypeScript Types
+
+This application uses TypeScript to provide type safety across the codebase.
+
+## Core Types
+
+The main types used in the application include:
+
+- Message types for chat interactions
+- Configuration types for API settings
+- UI state types for component props
+
+## Type Definitions
+
+### Message Types
+
+Message types are defined in the types directory and used throughout the application to ensure consistent data structure for chat messages.
+
+Key type interfaces:
+- `Message` - Represents a single chat message
+- `ChatState` - Represents the entire chat state including message history
+- `ApiConfig` - Configuration for API connections
+
+## Type Usage
+
+Types are used consistently across:
+- Component props
+- State management
+- API request/response handling
+- Configuration objects
+
+## Best Practices
+
+When extending the application:
+1. Create new type definitions in the `app/types` directory
+2. Use TypeScript interfaces for complex object structures
+3. Use type unions for values with multiple possible types
+4. Leverage TypeScript's utility types (Pick, Omit, Partial) where appropriate

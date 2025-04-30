@@ -9,20 +9,22 @@ How to set up and run this chatbot application.
 
 ## Prerequisites
 
-- Node.js installed
-- API keys for AI services (Dashscope and/or OpenAI)
+- Node.js 18+ installed
+- API keys for OpenAI-compatible AI services
 
 ## Installation
 
-1. Install dependencies:
+1. Clone the repository
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Create a `.env.local` file in the project root with:
+3. Create a `.env.local` file in the project root with your API keys:
 ```
-DASH_SCOPE_API_KEY=your_dashscope_api_key_here
-OPENAI_API_KEY=your_openai_api_key_here  # Optional
+OPENAI_API_KEY=your_openai_api_key_here
+CUSTOM_API_KEY=your_alternative_api_key_here  # For other compatible APIs
+CUSTOM_API_BASE_URL=https://your-api-endpoint.com  # If using non-OpenAI endpoints
 ```
 
 ## Development
@@ -33,6 +35,22 @@ npm run dev
 ```
 
 Access the application at http://localhost:3000
+
+## Configuration Options
+
+The application can be configured through:
+- Environment variables
+- UI settings panel (persisted in local storage)
+- [app/config.ts](mdc:lite-llm-chatbot/app/config.ts) - Default configuration values
+- [app/config/systemPrompt.ts](mdc:lite-llm-chatbot/app/config/systemPrompt.ts) - Default system instructions
+
+## Deployment
+
+Deploy to Vercel:
+```bash
+npm run build
+vercel deploy
+```
 
 ## Files to Update
 

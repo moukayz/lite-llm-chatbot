@@ -5,7 +5,38 @@ alwaysApply: false
 ---
 # API Integration
 
-This application uses OpenAI-compatible APIs for AI chat functionality.
+This application supports integration with various OpenAI-compatible AI APIs.
+
+## API Endpoint
+
+- [app/api/chat/route.ts](mdc:lite-llm-chatbot/app/api/chat/route.ts) - Implementation of the chat API endpoint
+  - Handles POST requests with message history
+  - Connects to configured AI service
+  - Streams responses back to the client
+  - Implements error handling
+
+## Configuration
+
+- [app/config.ts](mdc:lite-llm-chatbot/app/config.ts) - Stores API configuration:
+  - API keys
+  - Base URLs
+  - Model names
+
+## Client-Side Integration
+
+- [app/hooks/useChat.ts](mdc:lite-llm-chatbot/app/hooks/useChat.ts) - Client-side API interaction:
+  - Sends requests to the API endpoint
+  - Handles streaming responses
+  - Manages error states
+  - Updates UI with response data
+
+## Settings UI
+
+- [app/components/ChatSettings.tsx](mdc:lite-llm-chatbot/app/components/ChatSettings.tsx) - User interface for:
+  - Selecting API providers
+  - Entering API keys
+  - Configuring model parameters
+  - Saving preferences
 
 ## API Compatibility
 

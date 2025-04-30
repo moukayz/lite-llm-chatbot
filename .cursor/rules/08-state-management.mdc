@@ -1,0 +1,47 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# State Management
+
+This application uses React hooks for state management.
+
+## Core State Management Approach
+
+- React's built-in state hooks (`useState`, `useReducer`)
+- Custom hooks for complex state logic
+- Local storage for persisting configuration
+
+## Main State Components
+
+### Chat State
+
+- Managed by [app/hooks/useChat.ts](mdc:lite-llm-chatbot/app/hooks/useChat.ts)
+- Includes:
+  - Message history
+  - Loading states
+  - Error states
+  - API connection status
+
+### Configuration State
+
+- API settings stored in local storage
+- System prompt configuration
+- Model parameters
+
+## State Flow
+
+1. User inputs are captured by UI components
+2. State changes are processed by custom hooks
+3. API calls are triggered based on state changes
+4. Responses update state
+5. UI re-renders based on new state
+
+## Best Practices
+
+When extending the application:
+1. Create dedicated hooks for complex state logic
+2. Keep UI components focused on rendering, not state logic
+3. Use TypeScript to ensure type safety in state operations
+4. Consider performance implications for frequent state updates

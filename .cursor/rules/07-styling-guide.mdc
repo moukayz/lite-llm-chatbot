@@ -1,0 +1,37 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Styling Guide
+
+This application uses Tailwind CSS for styling components.
+
+## Core Styling Principles
+
+- Use Tailwind utility classes for all styling
+- Follow a consistent color scheme throughout the UI
+- Ensure responsive design for all components
+- Maintain accessibility standards
+
+## Key Style Elements
+
+- Chat interface styled for readability
+- Message bubbles with distinct colors for user/assistant
+- Clean, minimal UI with focus on content
+- Dark mode support
+
+## CSS Structure
+
+- [app/globals.css](mdc:lite-llm-chatbot/app/globals.css) - Global styles and Tailwind imports
+- Component-specific styles added directly via Tailwind classes
+- Tailwind config can be extended in [tailwind.config.ts](mdc:lite-llm-chatbot/tailwind.config.ts)
+
+## Styling Best Practices
+
+When adding new components:
+1. Use existing color scheme and spacing patterns
+2. Leverage Tailwind's responsive utilities for mobile compatibility
+3. Consider dark mode appearance with appropriate contrast
+4. Group related Tailwind classes logically in your JSX
+5. Use class extraction for repeated patterns

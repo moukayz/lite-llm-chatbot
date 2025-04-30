@@ -5,26 +5,34 @@ alwaysApply: false
 ---
 # Chat Implementation
 
-The application implements a simple chat interface that connects to AI APIs.
+The application implements a chat interface that connects to OpenAI-compatible APIs.
 
-## Frontend Implementation
+## Frontend Components
 
-- [app/page.tsx](mdc:lite-llm-chatbot/app/page.tsx) implements the chat UI with:
-  - Message history state
-  - Message input and submission
-  - Loading state handling
-  - Auto-scrolling to the latest message
+- [app/components/ChatArea.tsx](mdc:lite-llm-chatbot/app/components/ChatArea.tsx) - Main chat container
+- [app/components/ChatMessages.tsx](mdc:lite-llm-chatbot/app/components/ChatMessages.tsx) - Message list display
+- [app/components/MessageContent.tsx](mdc:lite-llm-chatbot/app/components/MessageContent.tsx) - Individual message formatting
+- [app/components/ChatInput.tsx](mdc:lite-llm-chatbot/app/components/ChatInput.tsx) - User input component
+- [app/components/ChatSettings.tsx](mdc:lite-llm-chatbot/app/components/ChatSettings.tsx) - API configuration UI
+- [app/components/SystemPromptEditor.tsx](mdc:lite-llm-chatbot/app/components/SystemPromptEditor.tsx) - Editor for system instructions
+
+## Chat Logic
+
+- [app/hooks/useChat.ts](mdc:lite-llm-chatbot/app/hooks/useChat.ts) implements the core chat functionality:
+  - Managing message history
+  - Handling API requests
+  - Error handling and loading states
+  - Streaming responses
 
 ## Backend Implementation
 
 - [app/api/chat/route.ts](mdc:lite-llm-chatbot/app/api/chat/route.ts) implements the API endpoint that:
   - Receives messages from the client
-  - Forwards them to the Dashscope API (Alibaba Cloud's AI service)
-  - Returns the AI response to the client
+  - Connects to AI models via OpenAI-compatible APIs
+  - Streams responses back to the client
   - Handles errors appropriately
 
 ## Configuration
 
-- [app/config.ts](mdc:lite-llm-chatbot/app/config.ts) manages API keys for:
-  - OpenAI API
-  - Dashscope API
+- [app/config.ts](mdc:lite-llm-chatbot/app/config.ts) - API key management
+- [app/config/systemPrompt.ts](mdc:lite-llm-chatbot/app/config/systemPrompt.ts) - Default system instructions

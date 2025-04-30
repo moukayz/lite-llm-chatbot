@@ -4,6 +4,7 @@ import { Message } from '../types/chat';
 interface UseChatOptions {
   onError?: (error: Error) => void;
   onStreamUpdate?: (updatedContent: string) => void;
+  onFinalResponse?: (finalContent: string) => void;
 }
 
 export function useChat(options?: UseChatOptions) {
@@ -79,6 +80,11 @@ export function useChat(options?: UseChatOptions) {
             }
           }
         }
+      }
+      
+      // Send the final, complete response when streaming is done
+      if (options?.onFinalResponse) {
+        options.onFinalResponse(accumulatedContent);
       }
 
       return assistantMessage;
