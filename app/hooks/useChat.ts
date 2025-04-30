@@ -23,6 +23,7 @@ export function useChat(options?: UseChatOptions) {
       
       setIsLoading(false);
       setIsStreaming(true);
+      console.log('Sending message:', messages);
 
       const response = await fetch('/api/chat', {
         method: 'POST',

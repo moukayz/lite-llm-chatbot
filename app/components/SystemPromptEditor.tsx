@@ -2,12 +2,12 @@ import { ChangeEvent, useState, useEffect } from 'react';
 import { defaultSystemPrompt } from '../config/systemPrompt';
 
 interface SystemPromptEditorProps {
-  onUpdateSystemPrompt: (newPrompt: string) => void;
+  updateSystemPrompt: (newPrompt: string) => void;
   currentSystemPrompt?: string;
 }
 
 export function SystemPromptEditor({ 
-  onUpdateSystemPrompt, 
+  updateSystemPrompt, 
   currentSystemPrompt = defaultSystemPrompt 
 }: SystemPromptEditorProps) {
   const [editedPrompt, setEditedPrompt] = useState(currentSystemPrompt);
@@ -27,13 +27,13 @@ export function SystemPromptEditor({
   };
   
   const handleApplyPrompt = () => {
-    onUpdateSystemPrompt(editedPrompt);
+    updateSystemPrompt(editedPrompt);
     setIsApplied(true);
     setHasChanges(false);
   };
   
   return (
-    <div className="bg-gray-50 p-4 rounded-lg shadow-sm h-full flex flex-col">
+    <div className="rounded-lg shadow-sm h-full flex flex-col">
       <h2 className="text-lg font-semibold mb-2">System Prompt</h2>
       <p className="text-sm text-gray-600 mb-2">
         Customize the system prompt to control the assistant&apos;s behavior.

@@ -2,12 +2,12 @@
 
 import { useState, FormEvent, useRef, useEffect, useCallback } from 'react';
 import { defaultSystemPrompt } from '../config/systemPrompt';
-import { ChatSettings } from './ChatSettings';
 import { ChatInput } from './ChatInput';
 import { ChatMessages } from './ChatMessages';
-import { SystemPromptEditor } from './SystemPromptEditor';
-import { Message, Model } from '../types/chat';
+import { ChatSettings, Message, Model } from '../types/chat';
 import { useChat } from '../hooks/useChat';
+import { Sidebar } from './Sidebar';
+import { DebugPanel } from './DebugPanel';
 
 const availableModels: Model[] = [
   { name: '通义千问-Max', code: 'qwen-max' },
@@ -16,16 +16,28 @@ const availableModels: Model[] = [
 ];
 
 export function ChatArea() {
-  const [input, setInput] = useState('');
-  const [systemPrompt, setSystemPrompt] = useState(defaultSystemPrompt);
+  const [chatSettings, setChatSettings] = useState({
+    systemPrompt: defaultSystemPrompt,
+    model: availableModels[0],
+    availableModels: availableModels
+  });
+
+  const updateChatSettings = (updates: Partial<ChatSettings>) => {
+    setChatSettings((prev) => ({ ...prev, ...updates }));
+  };
+
+  const [input, setInput] = useState("");
+
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [selectedModel, setSelectedModel] = useState<Model>(availableModels[0]);
-  const [finalResponse, setFinalResponse] = useState<string>('');
-  const [showDebugPanel, setShowDebugPanel] = useState<boolean>(true);
+  const [finalResponse, setFinalResponse] = useState<string>("");
+  const [showDebugPanel, setShowDebugPanel] = useState<boolean>(false);
+
+  const [showSidebar, setShowSidebar] = useState<boolean>(true);
+  const [sidebarWidth, setSidebarWidth] = useState<number>(300);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -51,116 +63,143 @@ export function ChatArea() {
 
   // Error handler
   const handleError = useCallback((error: Error) => {
-    console.error('Chat error:', error);
+    console.error("Chat error:", error);
   }, []);
 
   const { isLoading, isStreaming, sendMessage } = useChat({
     onStreamUpdate: handleStreamUpdate,
     onError: handleError,
-    onFinalResponse: handleFinalResponse
+    onFinalResponse: handleFinalResponse,
   });
-
-  // Handle system prompt updates
-  const handleUpdateSystemPrompt = useCallback((newPrompt: string) => {
-    setSystemPrompt(newPrompt);
-    // The updated prompt will be used in the next conversation
-  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading || isStreaming) return;
 
-    const userMessage: Message = { role: 'user', content: input };
+    console.log("handleSubmit, old messages: ", messages)
+    console.log("handleSubmit, raw input: ", input)
+    const userMessage: Message = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setFinalResponse(''); // Clear the previous final response
+    setInput("");
+    setFinalResponse(""); // Clear the previous final response
 
     // Create message array with current system prompt and all previous messages
     const messagesWithSystem: Message[] = [
-      { role: 'system', content: systemPrompt },
-      ...messages
+      { role: "system", content: chatSettings.systemPrompt },
+      ...messages,
     ];
-    
+
     // Add a placeholder for assistant's response
-    setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
-    
+    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+    console.log("handleSubmit, new messages: ", messages)
+
     // Send the request with the system prompt included
-    await sendMessage(messagesWithSystem, selectedModel.code);
+    await sendMessage(messagesWithSystem, chatSettings.model.code);
   };
 
   // Toggle debug panel
   const toggleDebugPanel = useCallback(() => {
-    setShowDebugPanel(prev => !prev);
+    setShowDebugPanel((prev) => !prev);
   }, []);
 
   return (
-    <div className="flex w-full  mx-auto max-w-6xl">
-      {/* Left sidebar with system prompt editor */}
-      <div className="w-1/4 flex-shrink-0">
-        <SystemPromptEditor 
-          onUpdateSystemPrompt={handleUpdateSystemPrompt}
-          currentSystemPrompt={systemPrompt}
+    <>
+      {/* Sidebar - Always render but translate when hidden */}
+      <Sidebar
+        chatSettings={chatSettings}
+        updateChatSettings={updateChatSettings}
+        sidebarWidth={sidebarWidth}
+        isSidebarVisible={showSidebar}
+        setSidebarWidth={setSidebarWidth}
+        setSidebarVisible={setShowSidebar}
+      />
+
+      {/* Overlay to capture clicks when sidebar is shown on mobile */}
+      {showSidebar && (
+        <div
+          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-0"
+          onClick={() => setShowSidebar(false)}
         />
-      </div>
-      
-      {/* Main chat area */}
-      <div className="w-2/4 flex-grow bg-white rounded-xl ml-4 shadow-lg overflow-hidden flex flex-col">
-        <div className="flex justify-between items-center bg-gray-50 border-b px-4 py-2">
-          <div className="flex-grow">
-            <ChatSettings 
-              selectedModel={selectedModel}
-              setSelectedModel={setSelectedModel}
-              availableModels={availableModels}
-            />
-          </div>
-          <button 
+      )}
+
+      {/* Main chat container */}
+      <div
+        // style={{ marginLeft: showSidebar ? `${sidebarWidth}px` : "0" }}
+        className="h-full relative flex flex-col flex-1"
+      >
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b p-2 flex items-center">
+          {!showSidebar && (
+            <button
+              onClick={() => {
+                setShowSidebar(true)
+                console.log("sidebar width: ", sidebarWidth)
+              }}
+              className="mr-3 p-1 rounded hover:bg-gray-100 transition-all"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+          )}
+          <h2 className="text-lg font-medium flex-grow">
+            <span className="p-1 rounded-md bg-yellow-200">
+              Chat with {chatSettings.model.name}
+            </span>
+          </h2>
+          <button
             onClick={toggleDebugPanel}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 ml-2 rounded-md text-sm font-medium"
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm font-medium flex items-center transition-colors"
           >
-            {showDebugPanel ? 'Hide Debug' : 'Show Debug'}
+            {showDebugPanel ? "Hide Debug" : "Debug"}
           </button>
         </div>
-        
-        <div className="flex-grow overflow-auto">
-          <ChatMessages 
-            messages={messages} 
-            isLoading={isLoading}
-            isStreaming={isStreaming}
-            messagesEndRef={messagesEndRef}
-          />
-        </div>
-        
-        <ChatInput 
-          input={input}
-          setInput={setInput}
-          handleSubmit={handleSubmit}
-          isLoading={isLoading}
-          isStreaming={isStreaming}
-        />
-      </div>
 
-      {/* Debug panel */}
-      {showDebugPanel && (
-        <div className="w-1/4 ml-4 flex-shrink-0">
-          <div className="bg-white rounded-xl shadow-lg p-4 h-full overflow-auto">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-semibold">Debug Panel</h3>
-              <button 
-                onClick={toggleDebugPanel}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
+        {/* Chat content container */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Messages area */}
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1 overflow-y-auto bg-white">
+              <ChatMessages
+                messages={messages}
+                isLoading={isLoading}
+                isStreaming={isStreaming}
+                messagesEndRef={messagesEndRef}
+              />
             </div>
-            <div className="mb-2">
-              <span className="text-sm font-medium text-gray-700">Complete Response:</span>
-            </div>
-            <div className="bg-gray-100 p-3 rounded-md whitespace-pre-wrap font-mono text-sm overflow-auto max-h-[calc(100vh-200px)]">
-              {finalResponse || 'No response yet'}
+
+            {/* Input area */}
+            <div className="p-4 border-t">
+              <ChatInput
+                input={input}
+                setInput={setInput}
+                handleSubmit={handleSubmit}
+                isLoading={isLoading}
+                isStreaming={isStreaming}
+              />
             </div>
           </div>
+
+          {/* Debug panel */}
+          <DebugPanel 
+            showDebugPanel={showDebugPanel}
+            toggleDebugPanel={toggleDebugPanel}
+            finalResponse={finalResponse}
+          />
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 } 
