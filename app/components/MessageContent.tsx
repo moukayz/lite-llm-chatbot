@@ -19,7 +19,7 @@ export function MessageContent({
   isStreaming = false,
 }: MessageProps) {
   if (role === "user") {
-    return <div>{content}</div>;
+    return <div className="text-gray-600">{content}</div>;
   } else if (!content) {
     return (
       isStreaming && (
@@ -27,7 +27,7 @@ export function MessageContent({
       )
     );
   } else {
-    console.log(`bot content: ${content}`);
+    // console.log(`bot content: ${content}`);
     return (
       <div className="prose prose-sm max-w-none">
         <ReactMarkdown

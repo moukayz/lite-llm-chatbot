@@ -1,12 +1,14 @@
 import React from 'react';
+import { Message } from '../types/chat';
+import { DebugMessageBlock } from './DebugMessageBlock';
 
 interface DebugPanelProps {
   showDebugPanel: boolean;
   toggleDebugPanel: () => void;
-  finalResponse: string;
+  messages: Message[];
 }
 
-export function DebugPanel({ showDebugPanel, toggleDebugPanel, finalResponse }: DebugPanelProps) {
+export function DebugPanel({ showDebugPanel, toggleDebugPanel, messages }: DebugPanelProps) {
   if (!showDebugPanel) return null;
   
   return (
@@ -20,14 +22,25 @@ export function DebugPanel({ showDebugPanel, toggleDebugPanel, finalResponse }: 
           ✕
         </button>
       </div>
+      
+      {/* Messages State Section */}
       <div className="p-3">
         <div className="mb-2">
           <span className="text-sm font-medium text-gray-700">
-            Complete Response:
+            Messages State ({messages.length}):
           </span>
         </div>
-        <div className="bg-gray-100 p-3 rounded-md whitespace-pre-wrap font-mono text-sm overflow-auto max-h-[calc(100vh-200px)]">
-          {finalResponse || "No response yet"}
+        <div className="bg-gray-100 p-3 rounded-md overflow-auto max-h-[calc(100vh-200px)]">
+          {messages.map((msg, index) => (
+            <DebugMessageBlock 
+              key={index} 
+              message={msg} 
+              index={index}
+            />
+          ))}
+          {messages.length === 0 && (
+            <div className="text-sm text-gray-500 italic">No messages yet</div>
+          )}
         </div>
       </div>
     </div>

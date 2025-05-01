@@ -1,4 +1,5 @@
 import { FormEvent, useRef, useEffect, KeyboardEvent } from 'react';
+import { Send } from 'lucide-react';
 
 interface ChatInputProps {
   input: string;
@@ -69,9 +70,7 @@ export function ChatInput({
           className="absolute right-2 bottom-2 p-1.5 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 disabled:hover:bg-transparent disabled:opacity-40"
           aria-label="Send message"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 rotate-90">
-            <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
-          </svg>
+          <Send size={20} className="rotate-90" />
         </button>
       </form>
       <p className="text-xs text-center text-gray-500 mt-2">

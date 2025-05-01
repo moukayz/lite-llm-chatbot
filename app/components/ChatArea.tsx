@@ -8,6 +8,7 @@ import { ChatSettings, Message, Model } from '../types/chat';
 import { useChat } from '../hooks/useChat';
 import { Sidebar } from './Sidebar';
 import { DebugPanel } from './DebugPanel';
+import { Menu } from 'lucide-react';
 
 const availableModels: Model[] = [
   { name: '通义千问-Max', code: 'qwen-max' },
@@ -30,11 +31,10 @@ export function ChatArea() {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [finalResponse, setFinalResponse] = useState<string>("");
   const [showDebugPanel, setShowDebugPanel] = useState<boolean>(false);
 
   const [showSidebar, setShowSidebar] = useState<boolean>(true);
-  const [sidebarWidth, setSidebarWidth] = useState<number>(300);
+  const [sidebarWidth, setSidebarWidth] = useState<number>(500);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -57,8 +57,8 @@ export function ChatArea() {
   }, []);
 
   // Final response handler
-  const handleFinalResponse = useCallback((completeContent: string) => {
-    setFinalResponse(completeContent);
+  const handleFinalResponse = useCallback(() => {
+    // No longer needed since finalResponse state was removed
   }, []);
 
   // Error handler
@@ -76,25 +76,22 @@ export function ChatArea() {
     e.preventDefault();
     if (!input.trim() || isLoading || isStreaming) return;
 
-    console.log("handleSubmit, old messages: ", messages)
-    console.log("handleSubmit, raw input: ", input)
-    const userMessage: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages];
+    // update system prompt if necessary
+    if (newMessages.length > 0 && newMessages[0].role === "system") { 
+      newMessages[0].content = chatSettings.systemPrompt;
+    } else {
+      newMessages.unshift({ role: "system", content: chatSettings.systemPrompt });
+    }
+
+    newMessages.push({ role: "user", content: input });
+    newMessages.push({ role: "assistant", content: "" });
+    setMessages(newMessages);
+
     setInput("");
-    setFinalResponse(""); // Clear the previous final response
-
-    // Create message array with current system prompt and all previous messages
-    const messagesWithSystem: Message[] = [
-      { role: "system", content: chatSettings.systemPrompt },
-      ...messages,
-    ];
-
-    // Add a placeholder for assistant's response
-    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
-    console.log("handleSubmit, new messages: ", messages)
 
     // Send the request with the system prompt included
-    await sendMessage(messagesWithSystem, chatSettings.model.code);
+    await sendMessage(newMessages, chatSettings.model.code);
   };
 
   // Toggle debug panel
@@ -103,7 +100,7 @@ export function ChatArea() {
   }, []);
 
   return (
-    <>
+    <div className="z-10 w-full flex flex-row relative h-screen">
       {/* Sidebar - Always render but translate when hidden */}
       <Sidebar
         chatSettings={chatSettings}
@@ -137,25 +134,11 @@ export function ChatArea() {
               }}
               className="mr-3 p-1 rounded hover:bg-gray-100 transition-all"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-              </svg>
+              <Menu size={20} />
             </button>
           )}
           <h2 className="text-lg font-medium flex-grow">
-            <span className="p-1 rounded-md bg-yellow-200">
+            <span className="p-1 text-gray-600 rounded-md bg-yellow-200">
               Chat with {chatSettings.model.name}
             </span>
           </h2>
@@ -196,10 +179,10 @@ export function ChatArea() {
           <DebugPanel 
             showDebugPanel={showDebugPanel}
             toggleDebugPanel={toggleDebugPanel}
-            finalResponse={finalResponse}
+            messages={messages}
           />
         </div>
       </div>
-    </>
+    </div>
   );
 } 
