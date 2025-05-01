@@ -1,5 +1,4 @@
 import { Model } from '../types/chat';
-import { PanelLeft } from 'lucide-react';
 
 interface ChatSettingsProps {
   selectedModel: Model;
@@ -34,13 +33,6 @@ export function ChatModelSelector({
       <div className="mt-4 flex items-center">
         <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
         <span className="text-xs text-gray-400">System prompt active</span>
-      </div>
-      
-      <div className="mt-6 pt-6 border-t border-gray-700">
-        <button className="w-full p-2 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm flex items-center justify-center">
-          <PanelLeft size={16} className="mr-2" />
-          New Chat
-        </button>
       </div>
     </div>
   );

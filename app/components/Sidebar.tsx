@@ -1,8 +1,9 @@
-import { SystemPromptEditor } from './SystemPromptEditor';
-import { ChatModelSelector } from './ChatModelSettings';
-import { ChatSettings } from '../types/chat';
-import { Dispatch, SetStateAction, useState, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { SystemPromptEditor } from "./SystemPromptEditor";
+import { ChatModelSelector } from "./ChatModelSettings";
+import { ChatSettings } from "../types/chat";
+import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
+import { PanelLeft, X } from "lucide-react";
+import { FoldableSection } from "./FoldableSection";
 
 interface SidebarProps {
   chatSettings: ChatSettings;
@@ -11,6 +12,7 @@ interface SidebarProps {
   isSidebarVisible: boolean;
   setSidebarWidth: Dispatch<SetStateAction<number>>;
   setSidebarVisible: Dispatch<SetStateAction<boolean>>;
+  handleNewChat: () => void;
 }
 
 export function Sidebar({
@@ -20,6 +22,7 @@ export function Sidebar({
   sidebarWidth,
   setSidebarWidth,
   setSidebarVisible,
+  handleNewChat,
 }: SidebarProps) {
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -90,23 +93,35 @@ export function Sidebar({
           </div>
         </div>
 
-        <div className="flex-grow p-4">
-          <SystemPromptEditor
-            updateSystemPrompt={(prompt) =>
-              updateChatSettings({ systemPrompt: prompt })
-            }
-            currentSystemPrompt={chatSettings.systemPrompt}
-          />
+        <div className="flex-grow p-4 space-y-4">
+          <FoldableSection title="System Prompt">
+            <SystemPromptEditor
+              updateSystemPrompt={(prompt) =>
+                updateChatSettings({ systemPrompt: prompt })
+              }
+              currentSystemPrompt={chatSettings.systemPrompt}
+            />
+          </FoldableSection>
+          
+          <FoldableSection title="Model Settings">
+            <ChatModelSelector
+              selectedModel={chatSettings.model}
+              updateSelectedModel={(new_model) =>
+                updateChatSettings({ model: new_model })
+              }
+              availableModels={chatSettings.availableModels}
+            />
+          </FoldableSection>
         </div>
 
-        <div className="p-4 border-t border-gray-700">
-          <ChatModelSelector
-            selectedModel={chatSettings.model}
-            updateSelectedModel={(new_model) =>
-              updateChatSettings({ model: new_model })
-            }
-            availableModels={chatSettings.availableModels}
-          />
+        <div className="mt-6 py-6 border-t border-gray-700">
+          <button
+            className="w-full p-2 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm flex items-center justify-center"
+            onClick={handleNewChat}
+          >
+            <PanelLeft size={16} className="mr-2" />
+            New Chat
+          </button>
         </div>
 
         {/* Resizer handle */}
@@ -117,4 +132,4 @@ export function Sidebar({
       </div>
     </aside>
   );
-} 
+}

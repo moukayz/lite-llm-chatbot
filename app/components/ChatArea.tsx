@@ -40,6 +40,11 @@ export function ChatArea() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleNewChat = () => {
+    setMessages([]);
+    setInput("");
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -109,6 +114,7 @@ export function ChatArea() {
         isSidebarVisible={showSidebar}
         setSidebarWidth={setSidebarWidth}
         setSidebarVisible={setShowSidebar}
+        handleNewChat={handleNewChat}
       />
 
       {/* Overlay to capture clicks when sidebar is shown on mobile */}
