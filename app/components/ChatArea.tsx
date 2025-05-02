@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { defaultSystemPrompt } from '../config/systemPrompt';
 import { ChatInput } from './ChatInput';
 import { ChatMessages } from './ChatMessages';
@@ -34,12 +34,7 @@ export function ChatArea() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [isFinalMessageReceived, setIsFinalMessageReceived] = useState(false);
   
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showDebugPanel, setShowDebugPanel] = useState<boolean>(false);
-  const [autoScroll, setAutoScroll] = useState<boolean>(true);
-  const scrollPositionRef = useRef<number>(0);
-
   const [showSidebar, setShowSidebar] = useState<boolean>(true);
   const [sidebarWidth, setSidebarWidth] = useState<number>(500);
 
@@ -62,7 +57,7 @@ export function ChatArea() {
     };
     
     loadChatSessions();
-  }, []);
+  }, [activeChatId]);
 
   // Handle chat session selection
   const handleSelectChat = async (chatId: string) => {
@@ -150,74 +145,6 @@ export function ChatArea() {
     onFinalResponse: handleFinalResponse,
   });
 
-  const scrollToBottom = useCallback((options?: ScrollIntoViewOptions) => {
-    if (!messagesEndRef.current || !messagesContainerRef.current) return;
-    
-    // Use the messages container's scrollTop property instead of scrollIntoView
-    const container = messagesContainerRef.current;
-    const scrollBehavior = options?.behavior || (autoScroll ? "smooth" : "auto");
-    
-    if (scrollBehavior === "smooth") {
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: "smooth"
-      });
-    } else {
-      container.scrollTop = container.scrollHeight;
-    }
-  }, [autoScroll]);
-
-  // Handle scroll events to detect when user manually scrolls
-  useEffect(() => {
-    const handleScroll = () => {
-      const container = messagesContainerRef.current;
-      if (!container) return;
-      
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      const isScrolledToBottom = scrollHeight - scrollTop - clientHeight < 50;
-      
-      setAutoScroll(isScrolledToBottom);
-      scrollPositionRef.current = scrollTop;
-    };
-
-    const container = messagesContainerRef.current;
-    container?.addEventListener('scroll', handleScroll);
-    
-    return () => {
-      container?.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  // Scroll to bottom when new messages are added
-  useEffect(() => {
-    // When receiving a completely new message (not streaming updates)
-    if (messages.length > 0 && (!isStreaming || messages[messages.length - 1].content === "")) {
-      scrollToBottom();
-    }
-  }, [messages.length, scrollToBottom, isStreaming]);
-
-  // Handle streaming updates with less aggressive scrolling
-  useEffect(() => {
-    if (isStreaming && autoScroll) {
-      scrollToBottom({ behavior: "auto" });
-    }
-  }, [isStreaming, messages, autoScroll, scrollToBottom]);
-
-  // Restore scroll position after losing focus and regaining it
-  useEffect(() => {
-    const handleFocus = () => {
-      const container = messagesContainerRef.current;
-      if (container && !autoScroll) {
-        container.scrollTop = scrollPositionRef.current;
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [autoScroll]);
-
   const handleSubmit = async (input: string) => {
     if (!input.trim() || isLoading || isStreaming) return;
 
@@ -302,14 +229,12 @@ export function ChatArea() {
           {/* Messages area */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <div 
-              ref={messagesContainerRef}
               className="flex-1 overflow-y-auto bg-white"
             >
               <ChatMessages
                 messages={messages}
                 isLoading={isLoading}
                 isStreaming={isStreaming}
-                messagesEndRef={messagesEndRef}
               />
             </div>
 

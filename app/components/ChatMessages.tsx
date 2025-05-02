@@ -1,4 +1,3 @@
-import { RefObject } from 'react';
 import { MessageContent } from './MessageContent';
 import { Message } from '../types/chat';
 
@@ -15,14 +14,12 @@ interface ChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
   isStreaming: boolean;
-  messagesEndRef: RefObject<HTMLDivElement | null>;
 }
 
 export function ChatMessages({ 
   messages, 
   isLoading, 
   isStreaming, 
-  messagesEndRef 
 }: ChatMessagesProps) {
   return (
     <div className="h-full overflow-y-auto">
@@ -81,7 +78,6 @@ export function ChatMessages({
         </div>
       )}
       
-      <div ref={messagesEndRef} className="h-12" />
     </div>
   );
 } 
