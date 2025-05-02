@@ -3,10 +3,12 @@ import { MessageContent } from './MessageContent';
 import { Message } from '../types/chat';
 
 function normalizeMathMarkdown(markdown: string): string {
-  return markdown.replace(
-    /(^|[\n\r])\\\[([\s\S]*?)\\\]($|[\n\r])/g,
-    (_, prefix, inside, suffix) => `${prefix}$$${inside}$$${suffix}`
-  );
+  const text = markdown.replace(/\\\[(.*?)\\\]/gs, (_, inside) => `$$${inside}$$`);
+  return text;
+  // return markdown.replace(
+  //   /(^|[\n\r]\s*)\\\[(.*?)\\\]($|[\n\r])/gs,
+  //   (_, prefix, inside, suffix) => `${prefix}$$${inside}$$${suffix}`
+  // );
 }
 
 interface ChatMessagesProps {

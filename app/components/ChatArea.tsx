@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { defaultSystemPrompt } from '../config/systemPrompt';
 import { ChatInput } from './ChatInput';
 import { ChatMessages } from './ChatMessages';
@@ -9,6 +9,8 @@ import { useChat } from '../hooks/useChat';
 import { Sidebar } from './Sidebar';
 import { DebugPanel } from './DebugPanel';
 import { Menu } from 'lucide-react';
+import { ChatSession } from './ChatHistory';
+import { createChatSession, fetchChatSessions, fetchChatSessionMessages, updateChatSession } from '../services/chatSessionService';
 
 const availableModels: Model[] = [
   { name: '通义千问-Max', code: 'qwen-max' },
@@ -27,27 +29,98 @@ export function ChatArea() {
     setChatSettings((prev) => ({ ...prev, ...updates }));
   };
 
-  const [input, setInput] = useState("");
-
   const [messages, setMessages] = useState<Message[]>([]);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [isFinalMessageReceived, setIsFinalMessageReceived] = useState(false);
+  
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showDebugPanel, setShowDebugPanel] = useState<boolean>(false);
+  const [autoScroll, setAutoScroll] = useState<boolean>(true);
+  const scrollPositionRef = useRef<number>(0);
 
   const [showSidebar, setShowSidebar] = useState<boolean>(true);
   const [sidebarWidth, setSidebarWidth] = useState<number>(500);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleNewChat = () => {
-    setMessages([]);
-    setInput("");
-  };
-
+  // Fetch chat sessions on component mount
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const loadChatSessions = async () => {
+      try {
+        const sessions = await fetchChatSessions();
+        setChatSessions(sessions);
+        
+        // If there are sessions and no active chat, set the first one as active
+        if (sessions.length > 0 && !activeChatId) {
+          setActiveChatId(sessions[0].id);
+          const sessionMessages = await fetchChatSessionMessages(sessions[0].id);
+          setMessages(sessionMessages);
+        }
+      } catch (error) {
+        console.error('Failed to load chat sessions:', error);
+      }
+    };
+    
+    loadChatSessions();
+  }, []);
+
+  // Handle chat session selection
+  const handleSelectChat = async (chatId: string) => {
+    if (chatId === activeChatId) return;
+    
+    try {
+      setActiveChatId(chatId);
+      const sessionMessages = await fetchChatSessionMessages(chatId);
+      setMessages(sessionMessages);
+    } catch (error) {
+      console.error(`Failed to load messages for chat session ${chatId}:`, error);
+    }
+  };
+
+  // Create a new chat session
+  const handleNewChat = async () => {
+    setMessages([]);
+    setActiveChatId(null);
+  };
+
+  // Update chat session on server when final message is received
+  useEffect(() => {
+    const updateSession = async () => {
+      if (isFinalMessageReceived && messages.length > 0) {
+        try {
+          // If we have an active chat id, update it. Otherwise create a new session.
+          let session: ChatSession;
+          
+          if (activeChatId) {
+            session = await updateChatSession(activeChatId, messages);
+          } else {
+            session = await createChatSession(messages);
+            setActiveChatId(session.id);
+          }
+          
+          // Update the chat sessions list
+          setChatSessions(prevSessions => {
+            const existingIndex = prevSessions.findIndex(s => s.id === session.id);
+            if (existingIndex >= 0) {
+              // Replace the existing session
+              const updatedSessions = [...prevSessions];
+              updatedSessions[existingIndex] = session;
+              return updatedSessions;
+            } else {
+              // Add the new session
+              return [session, ...prevSessions];
+            }
+          });
+          
+          setIsFinalMessageReceived(false);
+        } catch (error) {
+          console.error('Failed to update chat session:', error);
+        }
+      }
+    };
+    
+    updateSession();
+  }, [isFinalMessageReceived, messages, activeChatId]);
 
   // Streaming update handler
   const handleStreamUpdate = useCallback((updatedContent: string) => {
@@ -63,7 +136,7 @@ export function ChatArea() {
 
   // Final response handler
   const handleFinalResponse = useCallback(() => {
-    // No longer needed since finalResponse state was removed
+    setIsFinalMessageReceived(true);
   }, []);
 
   // Error handler
@@ -77,11 +150,79 @@ export function ChatArea() {
     onFinalResponse: handleFinalResponse,
   });
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const scrollToBottom = useCallback((options?: ScrollIntoViewOptions) => {
+    if (!messagesEndRef.current || !messagesContainerRef.current) return;
+    
+    // Use the messages container's scrollTop property instead of scrollIntoView
+    const container = messagesContainerRef.current;
+    const scrollBehavior = options?.behavior || (autoScroll ? "smooth" : "auto");
+    
+    if (scrollBehavior === "smooth") {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth"
+      });
+    } else {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [autoScroll]);
+
+  // Handle scroll events to detect when user manually scrolls
+  useEffect(() => {
+    const handleScroll = () => {
+      const container = messagesContainerRef.current;
+      if (!container) return;
+      
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isScrolledToBottom = scrollHeight - scrollTop - clientHeight < 50;
+      
+      setAutoScroll(isScrolledToBottom);
+      scrollPositionRef.current = scrollTop;
+    };
+
+    const container = messagesContainerRef.current;
+    container?.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      container?.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  // Scroll to bottom when new messages are added
+  useEffect(() => {
+    // When receiving a completely new message (not streaming updates)
+    if (messages.length > 0 && (!isStreaming || messages[messages.length - 1].content === "")) {
+      scrollToBottom();
+    }
+  }, [messages.length, scrollToBottom, isStreaming]);
+
+  // Handle streaming updates with less aggressive scrolling
+  useEffect(() => {
+    if (isStreaming && autoScroll) {
+      scrollToBottom({ behavior: "auto" });
+    }
+  }, [isStreaming, messages, autoScroll, scrollToBottom]);
+
+  // Restore scroll position after losing focus and regaining it
+  useEffect(() => {
+    const handleFocus = () => {
+      const container = messagesContainerRef.current;
+      if (container && !autoScroll) {
+        container.scrollTop = scrollPositionRef.current;
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [autoScroll]);
+
+  const handleSubmit = async (input: string) => {
     if (!input.trim() || isLoading || isStreaming) return;
 
     const newMessages = [...messages];
+    
     // update system prompt if necessary
     if (newMessages.length > 0 && newMessages[0].role === "system") { 
       newMessages[0].content = chatSettings.systemPrompt;
@@ -93,8 +234,6 @@ export function ChatArea() {
     newMessages.push({ role: "assistant", content: "" });
     setMessages(newMessages);
 
-    setInput("");
-
     // Send the request with the system prompt included
     await sendMessage(newMessages, chatSettings.model.code);
   };
@@ -105,7 +244,7 @@ export function ChatArea() {
   }, []);
 
   return (
-    <div className="z-10 w-full flex flex-row relative h-screen">
+    <div className="z-10 w-full flex flex-row relative h-screen overflow-hidden">
       {/* Sidebar - Always render but translate when hidden */}
       <Sidebar
         chatSettings={chatSettings}
@@ -115,6 +254,9 @@ export function ChatArea() {
         setSidebarWidth={setSidebarWidth}
         setSidebarVisible={setShowSidebar}
         handleNewChat={handleNewChat}
+        chatSessions={chatSessions}
+        activeChatId={activeChatId}
+        onSelectChat={handleSelectChat}
       />
 
       {/* Overlay to capture clicks when sidebar is shown on mobile */}
@@ -127,8 +269,7 @@ export function ChatArea() {
 
       {/* Main chat container */}
       <div
-        // style={{ marginLeft: showSidebar ? `${sidebarWidth}px` : "0" }}
-        className="h-full relative flex flex-col flex-1"
+        className="h-full relative flex flex-col flex-1 overflow-hidden"
       >
         {/* Header */}
         <div className="bg-white shadow-sm border-b p-2 flex items-center">
@@ -159,8 +300,11 @@ export function ChatArea() {
         {/* Chat content container */}
         <div className="flex-1 flex overflow-hidden">
           {/* Messages area */}
-          <div className="flex-1 flex flex-col">
-            <div className="flex-1 overflow-y-auto bg-white">
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div 
+              ref={messagesContainerRef}
+              className="flex-1 overflow-y-auto bg-white"
+            >
               <ChatMessages
                 messages={messages}
                 isLoading={isLoading}
@@ -172,8 +316,6 @@ export function ChatArea() {
             {/* Input area */}
             <div className="p-4 border-t">
               <ChatInput
-                input={input}
-                setInput={setInput}
                 handleSubmit={handleSubmit}
                 isLoading={isLoading}
                 isStreaming={isStreaming}

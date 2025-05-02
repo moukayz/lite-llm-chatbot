@@ -4,6 +4,7 @@ import { ChatSettings } from "../types/chat";
 import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
 import { PanelLeft, X } from "lucide-react";
 import { FoldableSection } from "./FoldableSection";
+import { ChatHistory, ChatSession } from "./ChatHistory";
 
 interface SidebarProps {
   chatSettings: ChatSettings;
@@ -13,6 +14,9 @@ interface SidebarProps {
   setSidebarWidth: Dispatch<SetStateAction<number>>;
   setSidebarVisible: Dispatch<SetStateAction<boolean>>;
   handleNewChat: () => void;
+  chatSessions: ChatSession[];
+  activeChatId: string | null;
+  onSelectChat: (chatId: string) => void;
 }
 
 export function Sidebar({
@@ -23,6 +27,9 @@ export function Sidebar({
   setSidebarWidth,
   setSidebarVisible,
   handleNewChat,
+  chatSessions,
+  activeChatId,
+  onSelectChat,
 }: SidebarProps) {
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -93,7 +100,15 @@ export function Sidebar({
           </div>
         </div>
 
-        <div className="flex-grow p-4 space-y-4">
+        <div className="flex-grow p-4 space-y-4 overflow-y-auto">
+          <FoldableSection title="Chat History" isInitiallyExpanded={true}>
+            <ChatHistory 
+              chatSessions={chatSessions}
+              activeChatId={activeChatId}
+              onSelectChat={onSelectChat}
+            />
+          </FoldableSection>
+          
           <FoldableSection title="System Prompt">
             <SystemPromptEditor
               updateSystemPrompt={(prompt) =>

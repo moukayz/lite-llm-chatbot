@@ -44,14 +44,33 @@ $$
 \\int_{-\\infty}^\\infty e^{-x^2} dx = \\sqrt{\\pi}
 \\]
 
-$$
-\\int_{-\\infty}^\\infty e^{-x^2} dx = \\sqrt{\\pi}
-$$
+abc
+      $$
+      \\int_{-\\infty}^\\infty e^{-x^2} dx = \\sqrt{\\pi}
+      $$
+bcd
+    \\[
+    P_i = \\frac{\\exp(z'_i)}{\\sum_j \\exp(z'_j)}
+    \\]
+ddd
+  \\[
+  P_1 = \\frac{\\exp(4)}{\\exp(4) + \\exp(6) + \\exp(10)} \\approx 0.0001
+  \\]
+  \\[
+  P_2 = \\frac{\\exp(6)}{\\exp(4) + \\exp(6) + \\exp(10)} \\approx 0.002
+  \\]
+  \\[
+  P_3 = \\frac{\\exp(10)}{\\exp(4) + \\exp(6) + \\exp(10)} \\approx 0.998
+  \\]
+xxx
 
 `;
 
 function normalizeMathMarkdown(markdown: string): string {
-  return markdown.replace(/(^|[\n\r])\\\[(.*?)\\\]($|[\n\r])/gs, (_, prefix, inside, suffix) => `${prefix}$$${inside}$$${suffix}`);
+  // const text = markdown.replace(/(^|[\n\r]\s*)\\\[(.*?)\\\]($|[\n\r])/gs, (_, prefix, inside, suffix) => `${prefix}$$${inside}$$${suffix}`);
+  const text = markdown.replace(/\\\[(.*?)\\\]/gs, (_, inside) => `$$${inside}$$`);
+  console.log(text);
+  return text;
 }
 
 export default function Test() {
