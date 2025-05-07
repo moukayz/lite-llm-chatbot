@@ -1,10 +1,11 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface FoldableSectionProps {
   title: string;
   children: ReactNode;
-  isInitiallyExpanded?: boolean;
+  isExpanded?: boolean;
+  onExpandChange?: (expanded: boolean) => void;
   titleClassName?: string;
   contentClassName?: string;
 }
@@ -12,14 +13,23 @@ interface FoldableSectionProps {
 export function FoldableSection({
   title,
   children,
-  isInitiallyExpanded = true,
+  isExpanded: controlledIsExpanded,
+  onExpandChange,
   titleClassName = "",
   contentClassName = "",
 }: FoldableSectionProps) {
-  const [isExpanded, setIsExpanded] = useState(isInitiallyExpanded);
+  const [isExpanded, setIsExpanded] = useState(controlledIsExpanded);
+  
+  useEffect(() => {
+    if (controlledIsExpanded !== undefined) {
+      setIsExpanded(controlledIsExpanded);
+    }
+  }, [controlledIsExpanded]);
 
   const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
+    const newValue = !isExpanded;
+    setIsExpanded(newValue);
+    onExpandChange?.(newValue);
   };
 
   return (
