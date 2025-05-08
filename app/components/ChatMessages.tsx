@@ -84,7 +84,7 @@ export const ChatMessages = React.memo(function ChatMessages({
     <div className="relative h-full flex-1 overflow-hidden">
       <div 
         ref={messagesContainerRef}
-        className="h-full overflow-y-auto"
+        className="h-full overflow-y-auto pb-25"
         onScroll={handleScroll}
         // style={{ scrollBehavior: 'smooth' }}
       >

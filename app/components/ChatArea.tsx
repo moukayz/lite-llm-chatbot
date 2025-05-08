@@ -18,11 +18,53 @@ const availableModels: Model[] = [
   { name: '通义千问-Turbo', code: 'qwen-turbo' },
 ];
 
+interface ChatHeaderProps {
+  showSidebar: boolean;
+  setShowSidebar: (show: boolean) => void;
+  chatSettings: ChatSettings;
+  showDebugPanel: boolean;
+  toggleDebugPanel: () => void;
+}
+
+const ChatHeader = ({ 
+  showSidebar, 
+  setShowSidebar, 
+  chatSettings, 
+  showDebugPanel, 
+  toggleDebugPanel 
+}: ChatHeaderProps) => {
+  return (
+    <div className="bg-white shadow-sm border-b p-2 flex items-center">
+      {!showSidebar && (
+        <button
+          onClick={() => {
+            setShowSidebar(true);
+          }}
+          className="mr-3 p-1 rounded hover:bg-gray-100 transition-all"
+        >
+          <Menu size={20} />
+        </button>
+      )}
+      <h2 className="text-lg font-medium flex-grow">
+        <span className="p-1 text-gray-600 rounded-md bg-yellow-200">
+          Chat with {chatSettings.model.name}
+        </span>
+      </h2>
+      <button
+        onClick={toggleDebugPanel}
+        className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm font-medium flex items-center transition-colors"
+      >
+        {showDebugPanel ? "Hide Debug" : "Debug"}
+      </button>
+    </div>
+  );
+};
+
 export function ChatArea() {
   const [chatSettings, setChatSettings] = useState({
     systemPrompt: defaultSystemPrompt,
     model: availableModels[0],
-    availableModels: availableModels
+    availableModels: availableModels,
   });
 
   const updateChatSettings = (updates: Partial<ChatSettings>) => {
@@ -33,7 +75,7 @@ export function ChatArea() {
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [isFinalMessageReceived, setIsFinalMessageReceived] = useState(false);
-  
+
   const [showDebugPanel, setShowDebugPanel] = useState<boolean>(false);
   const [showSidebar, setShowSidebar] = useState<boolean>(true);
 
@@ -43,31 +85,36 @@ export function ChatArea() {
       try {
         const sessions = await fetchChatSessions();
         setChatSessions(sessions);
-        
+
         // If there are sessions and no active chat, set the first one as active
         if (sessions.length > 0 && !activeChatId) {
           setActiveChatId(sessions[0].id);
-          const sessionMessages = await fetchChatSessionMessages(sessions[0].id);
+          const sessionMessages = await fetchChatSessionMessages(
+            sessions[0].id
+          );
           setMessages(sessionMessages);
         }
       } catch (error) {
-        console.error('Failed to load chat sessions:', error);
+        console.error("Failed to load chat sessions:", error);
       }
     };
-    
+
     loadChatSessions();
   }, [activeChatId]);
 
   // Handle chat session selection
   const handleSelectChat = async (chatId: string) => {
     if (chatId === activeChatId) return;
-    
+
     try {
       setActiveChatId(chatId);
       const sessionMessages = await fetchChatSessionMessages(chatId);
       setMessages(sessionMessages);
     } catch (error) {
-      console.error(`Failed to load messages for chat session ${chatId}:`, error);
+      console.error(
+        `Failed to load messages for chat session ${chatId}:`,
+        error
+      );
     }
   };
 
@@ -84,17 +131,19 @@ export function ChatArea() {
         try {
           // If we have an active chat id, update it. Otherwise create a new session.
           let session: ChatSession;
-          
+
           if (activeChatId) {
             session = await updateChatSession(activeChatId, messages);
           } else {
             session = await createChatSession(messages);
             setActiveChatId(session.id);
           }
-          
+
           // Update the chat sessions list
-          setChatSessions(prevSessions => {
-            const existingIndex = prevSessions.findIndex(s => s.id === session.id);
+          setChatSessions((prevSessions) => {
+            const existingIndex = prevSessions.findIndex(
+              (s) => s.id === session.id
+            );
             if (existingIndex >= 0) {
               // Replace the existing session
               const updatedSessions = [...prevSessions];
@@ -105,14 +154,14 @@ export function ChatArea() {
               return [session, ...prevSessions];
             }
           });
-          
+
           setIsFinalMessageReceived(false);
         } catch (error) {
-          console.error('Failed to update chat session:', error);
+          console.error("Failed to update chat session:", error);
         }
       }
     };
-    
+
     updateSession();
   }, [isFinalMessageReceived, messages, activeChatId]);
 
@@ -148,12 +197,15 @@ export function ChatArea() {
     if (!input.trim() || isLoading || isStreaming) return;
 
     const newMessages = [...messages];
-    
+
     // update system prompt if necessary
-    if (newMessages.length > 0 && newMessages[0].role === "system") { 
+    if (newMessages.length > 0 && newMessages[0].role === "system") {
       newMessages[0].content = chatSettings.systemPrompt;
     } else {
-      newMessages.unshift({ role: "system", content: chatSettings.systemPrompt });
+      newMessages.unshift({
+        role: "system",
+        content: chatSettings.systemPrompt,
+      });
     }
 
     newMessages.push({ role: "user", content: input });
@@ -193,43 +245,28 @@ export function ChatArea() {
 
       {/* Main chat container */}
       <div className="h-full relative flex flex-col flex-1 overflow-hidden">
-        {/* Header */}
-        <div className="bg-white shadow-sm border-b p-2 flex items-center">
-          {!showSidebar && (
-            <button
-              onClick={() => {
-                setShowSidebar(true);
-              }}
-              className="mr-3 p-1 rounded hover:bg-gray-100 transition-all"
-            >
-              <Menu size={20} />
-            </button>
-          )}
-          <h2 className="text-lg font-medium flex-grow">
-            <span className="p-1 text-gray-600 rounded-md bg-yellow-200">
-              Chat with {chatSettings.model.name}
-            </span>
-          </h2>
-          <button
-            onClick={toggleDebugPanel}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm font-medium flex items-center transition-colors"
-          >
-            {showDebugPanel ? "Hide Debug" : "Debug"}
-          </button>
-        </div>
+        <ChatHeader
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          chatSettings={chatSettings}
+          showDebugPanel={showDebugPanel}
+          toggleDebugPanel={toggleDebugPanel}
+        />
 
-        {/* Chat content container */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Messages area */}
+          {/* Chat content container */}
           <div className="flex-1 flex flex-col overflow-hidden">
-            <ChatMessages
-              messages={messages}
-              isLoading={isLoading}
-              isStreaming={isStreaming}
-            />
+            {/* Messages area */}
+            <div className="flex-1 flex flex-col overflow-hidden ">
+              <ChatMessages
+                messages={messages}
+                isLoading={isLoading}
+                isStreaming={isStreaming}
+              />
+            </div>
 
-            {/* Input area */}
-            <div className="p-4 border-t">
+            {/* Floating Input area */}
+            <div className="max-w-3xl mx-auto w-full bg-transparent px-3">
               <ChatInput
                 handleSubmit={handleSubmit}
                 isLoading={isLoading}

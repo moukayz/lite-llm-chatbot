@@ -56,8 +56,8 @@ export const ChatInput = memo(function ChatInput({
   }, [onSubmit]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 pb-4">
-      <form onSubmit={onSubmit} className="relative bg-white rounded-lg border shadow-sm">
+    <div className="w-full max-w-3xl mx-auto">
+      <form onSubmit={onSubmit} className="relative bg-white rounded-full border shadow-sm">
         <textarea
           ref={textareaRef}
           value={localInput}
