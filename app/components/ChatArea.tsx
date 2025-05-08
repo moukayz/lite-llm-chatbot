@@ -36,7 +36,6 @@ export function ChatArea() {
   
   const [showDebugPanel, setShowDebugPanel] = useState<boolean>(false);
   const [showSidebar, setShowSidebar] = useState<boolean>(true);
-  const [sidebarWidth, setSidebarWidth] = useState<number>(500);
 
   // Fetch chat sessions on component mount
   useEffect(() => {
@@ -176,9 +175,7 @@ export function ChatArea() {
       <Sidebar
         chatSettings={chatSettings}
         updateChatSettings={updateChatSettings}
-        sidebarWidth={sidebarWidth}
         isSidebarVisible={showSidebar}
-        setSidebarWidth={setSidebarWidth}
         setSidebarVisible={setShowSidebar}
         handleNewChat={handleNewChat}
         chatSessions={chatSessions}
@@ -202,7 +199,6 @@ export function ChatArea() {
             <button
               onClick={() => {
                 setShowSidebar(true);
-                console.log("sidebar width: ", sidebarWidth);
               }}
               className="mr-3 p-1 rounded hover:bg-gray-100 transition-all"
             >

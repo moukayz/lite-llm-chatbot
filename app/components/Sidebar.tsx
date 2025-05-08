@@ -9,9 +9,7 @@ import { ChatHistory, ChatSession } from "./ChatHistory";
 interface SidebarProps {
   chatSettings: ChatSettings;
   updateChatSettings: (updates: Partial<ChatSettings>) => void;
-  sidebarWidth: number;
   isSidebarVisible: boolean;
-  setSidebarWidth: Dispatch<SetStateAction<number>>;
   setSidebarVisible: Dispatch<SetStateAction<boolean>>;
   handleNewChat: () => void;
   chatSessions: ChatSession[];
@@ -23,8 +21,6 @@ export function Sidebar({
   chatSettings,
   updateChatSettings,
   isSidebarVisible,
-  sidebarWidth,
-  setSidebarWidth,
   setSidebarVisible,
   handleNewChat,
   chatSessions,
@@ -32,6 +28,7 @@ export function Sidebar({
   onSelectChat,
 }: SidebarProps) {
   const [isResizing, setIsResizing] = useState(false);
+  const [localSidebarWidth, setLocalSidebarWidth] = useState(500);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const MIN_WIDTH = 180;
   const MAX_WIDTH = 500;
@@ -56,7 +53,7 @@ export function Sidebar({
       const newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, e.clientX));
 
       // Notify parent component about width change
-      setSidebarWidth(newWidth);
+      setLocalSidebarWidth(newWidth);
     };
 
     const handleMouseUp = () => {
@@ -72,13 +69,13 @@ export function Sidebar({
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isResizing, setSidebarWidth]);
+  }, [isResizing, setLocalSidebarWidth]);
 
   return (
     <aside
       ref={sidebarRef}
       style={{
-        width: `${isSidebarVisible ? sidebarWidth : 0}px`,
+        width: `${isSidebarVisible ? localSidebarWidth : 0}px`,
       }}
       className={`bg-gray-900 text-white overflow-hidden relative h-full flex flex-col border-r border-gray-700 z-10 
         ${transitionTypeClass}`}
@@ -101,7 +98,7 @@ export function Sidebar({
         </div>
 
         <div className="flex-grow p-4 space-y-4 overflow-y-auto">
-          <FoldableSection title="Chat History" isInitiallyExpanded={true}>
+          <FoldableSection title="Chat History">
             <ChatHistory 
               chatSessions={chatSessions}
               activeChatId={activeChatId}
