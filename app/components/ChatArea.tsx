@@ -195,16 +195,14 @@ export function ChatArea() {
       )}
 
       {/* Main chat container */}
-      <div
-        className="h-full relative flex flex-col flex-1 overflow-hidden"
-      >
+      <div className="h-full relative flex flex-col flex-1 overflow-hidden">
         {/* Header */}
         <div className="bg-white shadow-sm border-b p-2 flex items-center">
           {!showSidebar && (
             <button
               onClick={() => {
-                setShowSidebar(true)
-                console.log("sidebar width: ", sidebarWidth)
+                setShowSidebar(true);
+                console.log("sidebar width: ", sidebarWidth);
               }}
               className="mr-3 p-1 rounded hover:bg-gray-100 transition-all"
             >
@@ -228,15 +226,11 @@ export function ChatArea() {
         <div className="flex-1 flex overflow-hidden">
           {/* Messages area */}
           <div className="flex-1 flex flex-col overflow-hidden">
-            <div 
-              className="flex-1 overflow-y-auto bg-white"
-            >
-              <ChatMessages
-                messages={messages}
-                isLoading={isLoading}
-                isStreaming={isStreaming}
-              />
-            </div>
+            <ChatMessages
+              messages={messages}
+              isLoading={isLoading}
+              isStreaming={isStreaming}
+            />
 
             {/* Input area */}
             <div className="p-4 border-t">
@@ -249,7 +243,7 @@ export function ChatArea() {
           </div>
 
           {/* Debug panel */}
-          <DebugPanel 
+          <DebugPanel
             showDebugPanel={showDebugPanel}
             toggleDebugPanel={toggleDebugPanel}
             messages={messages}
