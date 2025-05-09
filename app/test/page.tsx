@@ -7,6 +7,15 @@ import 'highlight.js/styles/github.css'; // or any style you like
 import 'katex/dist/katex.min.css';
 
 const message = `
+
+### 2. **网络爬虫**
+\`requests\`、\`BeautifulSoup\` 和 \`Scrapy\` 等。
+
+- **库**：\`requests\`、\`BeautifulSoup\` 和 \`Scrapy\` 等。
+  - **requests**：用于发送 HTTP 请求。
+  - **BeautifulSoup**：用于解析 HTML 和 XML 文档。
+  - **Scrapy**：一个强大的爬虫框架，适用于大规模的数据抓取。
+
 # head 1
 ## head 2
 ### head 3
