@@ -5,38 +5,58 @@ import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight"; // optional for code highlight
 import "highlight.js/styles/github.css"; // or any style you like
 import "katex/dist/katex.min.css";
-import { Message } from '../types/chat';
+
+function normalizeMathMarkdown(markdown: string): string {
+  const text = markdown.replace(/\\\[(.*?)\\\]/gs, (_, inside) => `$$${inside}$$`);
+  return text;
+  // return markdown.replace(
+  //   /(^|[\n\r]\s*)\\\[(.*?)\\\]($|[\n\r])/gs,
+  //   (_, prefix, inside, suffix) => `${prefix}$$${inside}$$${suffix}`
+  // );
+}
 
 type MessageProps = {
-  role: Message['role'];
   content: string;
   isStreaming?: boolean;
 };
 
-export function MessageContent({
-  role,
-  content,
-  isStreaming = false,
-}: MessageProps) {
-  if (role === "user") {
-    return <div className="text-gray-600">{content}</div>;
-  } else if (!content) {
+export function MessageContent({ content, isStreaming = false }: MessageProps) {
+  if (!content) {
     return (
       isStreaming && (
         <span className="inline-block w-2 h-4 bg-gray-400 animate-pulse"></span>
       )
     );
   } else {
-    // console.log(`bot content: ${content}`);
     return (
-      <div className="prose prose-sm max-w-none">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm, remarkMath]}
-          rehypePlugins={[rehypeKatex, rehypeHighlight]}
-        >
-          {content}
-        </ReactMarkdown>
+      <div className={`bg-gray-50 py-5`}>
+        <div className="max-w-3xl mx-auto px-4">
+          <div className={`flex items-start justify-start`}>
+            <div className="prose prose-sm max-w-none">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkMath]}
+                rehypePlugins={[rehypeKatex, rehypeHighlight]}
+              >
+                {normalizeMathMarkdown(content)}
+              </ReactMarkdown>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
+}
+
+export function UserMessageContent({ content }: { content: string }) {
+  return (
+    <div className={`bg-gray-50  py-10`}>
+      <div className="max-w-3xl mx-auto px-4">
+        <div className={`flex items-start justify-end`}>
+          <div className={`bg-gray-200 rounded-full py-4 px-8`}>
+            {content}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
