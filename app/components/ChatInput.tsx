@@ -1,63 +1,76 @@
 import { FormEvent, useRef, useEffect, KeyboardEvent, useState, memo, useCallback } from 'react';
 import { Send } from 'lucide-react';
+import { useTransition } from 'react';
 
 interface ChatInputProps {
   handleSubmit: (input: string) => Promise<void>;
-  isLoading: boolean;
   isStreaming: boolean;
 }
 
 export const ChatInput = memo(function ChatInput({ 
   handleSubmit, 
-  isLoading, 
   isStreaming 
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [localInput, setLocalInput] = useState("");
-  
-  // Handle submission with focus
-  const onSubmit = useCallback(async (e: FormEvent) => {
-    e.preventDefault();
-    if (!localInput.trim() || isLoading || isStreaming) return;
-    
-    handleSubmit(localInput);
+  const [, startTransition] = useTransition();
 
-    setLocalInput("");
-    setTimeout(() => {
-      textareaRef.current?.focus();
-    }, 0);
-  }, [localInput, isLoading, isStreaming, handleSubmit]);
+  // Handle submission with focus
+  const onSubmit = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault();
+      if (!localInput.trim() || isStreaming) return;
+
+      setLocalInput("");
+      startTransition(() => {
+        handleSubmit(localInput);
+        setTimeout(() => {
+          textareaRef.current?.focus();
+        }, 0);
+      });
+    },
+    [localInput, isStreaming, handleSubmit]
+  );
 
   // Auto-resize textarea
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto';
+      textarea.style.height = "auto";
       textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
     }
   }, [localInput]);
-  
+
   // Focus input on component mount
   useEffect(() => {
     textareaRef.current?.focus();
   }, []);
 
   // Handle text changes efficiently
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setLocalInput(e.target.value);
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setLocalInput(e.target.value);
+    },
+    []
+  );
 
   // Handle Enter key for submission (Shift+Enter for new line)
-  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      onSubmit(e as unknown as FormEvent);
-    }
-  }, [onSubmit]);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+        e.preventDefault();
+        onSubmit(e as unknown as FormEvent);
+      }
+    },
+    [onSubmit]
+  );
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <form onSubmit={onSubmit} className="relative bg-white rounded-full border shadow-sm">
+      <form
+        onSubmit={onSubmit}
+        className="relative flex bg-white rounded-full border shadow-sm"
+      >
         <textarea
           ref={textareaRef}
           value={localInput}
@@ -69,7 +82,7 @@ export const ChatInput = memo(function ChatInput({
         />
         <button
           type="submit"
-          disabled={isLoading || isStreaming || !localInput.trim()}
+          disabled={isStreaming || !localInput.trim()}
           className="absolute right-2 bottom-2 p-1.5 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 disabled:hover:bg-transparent disabled:opacity-40"
           aria-label="Send message"
         >
@@ -77,7 +90,9 @@ export const ChatInput = memo(function ChatInput({
         </button>
       </form>
       <p className="text-xs text-center text-gray-500 mt-2">
-        {isLoading || isStreaming ? 'AI is responding...' : 'Press Enter to send, Shift+Enter for new line'}
+        {isStreaming
+          ? "AI is responding..."
+          : "Press Enter to send, Shift+Enter for new line"}
       </p>
     </div>
   );

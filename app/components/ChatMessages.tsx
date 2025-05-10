@@ -5,19 +5,16 @@ import { ChatMessageList } from './ChatMessageList';
 
 interface ChatMessagesProps {
   messages: Message[];
-  isLoading: boolean;
   isStreaming: boolean;
 }
 
 export const ChatMessages = React.memo(function ChatMessages({
   messages,
-  isLoading,
   isStreaming,
 }: ChatMessagesProps) {
   const [showScrollButton, setShowScrollButton] = useState<boolean>(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const ScrollContainerRef = useRef<HTMLDivElement>(null);
-  const lastMessageRef = useRef<HTMLDivElement>(null);
 
   // Handle scrolling
   // console.log("showScrollButton: ", showScrollButton);
@@ -99,7 +96,7 @@ export const ChatMessages = React.memo(function ChatMessages({
             isStreaming={isStreaming}
           />
 
-          {isLoading && (
+          {/* {isLoading && (
             <div className="py-5 bg-gray-50" ref={lastMessageRef}>
               <div className="max-w-3xl mx-auto px-4">
                 <div className="flex items-start">
@@ -113,7 +110,7 @@ export const ChatMessages = React.memo(function ChatMessages({
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </div>
 
         {/* Scroll to bottom button */}

@@ -187,15 +187,16 @@ export function ChatArea() {
     console.error("Chat error:", error);
   }, []);
 
-  const { isLoading, isStreaming, sendMessage } = useChat({
+  const {isStreaming, sendMessage } = useChat({
     onStreamUpdate: handleStreamUpdate,
     onError: handleError,
     onFinalResponse: handleFinalResponse,
   });
 
   const handleSubmit = async (input: string) => {
-    if (!input.trim() || isLoading || isStreaming) return;
+    if (!input.trim() || isStreaming) return;
 
+    console.time('handleSubmit');
     const newMessages = [...messages];
 
     // update system prompt if necessary
@@ -211,6 +212,8 @@ export function ChatArea() {
     newMessages.push({ role: "user", content: input });
     newMessages.push({ role: "assistant", content: "" });
     setMessages(newMessages);
+
+    console.timeEnd('handleSubmit');
 
     // Send the request with the system prompt included
     await sendMessage(newMessages, chatSettings.model.code);
@@ -260,7 +263,6 @@ export function ChatArea() {
             <div className="flex-1 flex flex-col overflow-hidden ">
               <ChatMessages
                 messages={messages}
-                isLoading={isLoading}
                 isStreaming={isStreaming}
               />
             </div>
@@ -269,7 +271,6 @@ export function ChatArea() {
             <div className="max-w-3xl mx-auto w-full bg-transparent px-3">
               <ChatInput
                 handleSubmit={handleSubmit}
-                isLoading={isLoading}
                 isStreaming={isStreaming}
               />
             </div>
