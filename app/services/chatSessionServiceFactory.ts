@@ -6,7 +6,7 @@ import { ChatSession } from '../components/ChatHistory';
 // Check if we should use PostgreSQL
 const shouldUsePostgres = (): boolean => {
   // Use PostgreSQL if DB_STORAGE environment variable is set to 'postgres'
-  console.log('NEXT_PUBLIC_DB_STORAGE', process.env.NEXT_PUBLIC_DB_STORAGE);
+//   console.log('NEXT_PUBLIC_DB_STORAGE', process.env.NEXT_PUBLIC_DB_STORAGE);
   return process.env.NEXT_PUBLIC_DB_STORAGE === 'postgres';
 };
 

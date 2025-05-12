@@ -15,22 +15,40 @@ export const ChatMessages = React.memo(function ChatMessages({
   const [showScrollButton, setShowScrollButton] = useState<boolean>(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const ScrollContainerRef = useRef<HTMLDivElement>(null);
+  const lastScrollPositionRef = useRef<number>(0);
+  const cancelAutoScrollRef = useRef<boolean>(false);
 
   // Handle scrolling
   // console.log("showScrollButton: ", showScrollButton);
-  console.log("ChatMessages rendered");
-  const handleScroll = useCallback(() => {
-    if (isStreaming) {
-      return;
-    }
+  // console.log("ChatMessages rendered");
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      // console.log("handleScroll: ", e.currentTarget.scrollTop, lastScrollPositionRef.current);
 
-    if (ScrollContainerRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } =
-        ScrollContainerRef.current;
-      const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 50;
-      setShowScrollButton(!isAtBottom && scrollHeight > clientHeight);
-    }
-  }, [isStreaming]);
+      const lastPos = lastScrollPositionRef.current;
+      lastScrollPositionRef.current = e.currentTarget.scrollTop;
+      if (isStreaming) {
+        if (lastPos > e.currentTarget.scrollTop) {
+          cancelAutoScrollRef.current = true;
+        }
+      }
+
+      // display or hide the scroll button only when:
+      // 1. the chat is not streaming
+      // 2. user scrolling up
+      if (
+        ScrollContainerRef.current &&
+        (!isStreaming || cancelAutoScrollRef.current)
+      ) {
+        const { scrollTop, scrollHeight, clientHeight } =
+          ScrollContainerRef.current;
+        const isAtBottom =
+          Math.abs(scrollHeight - scrollTop - clientHeight) < 50;
+        setShowScrollButton(!isAtBottom && scrollHeight > clientHeight);
+      }
+    },
+    [isStreaming]
+  );
 
   // Scroll to bottom function with smooth animation
   const scrollToBottom = useCallback((isSmooth: boolean = true) => {
@@ -42,20 +60,30 @@ export const ChatMessages = React.memo(function ChatMessages({
     }
   }, []);
 
+  useEffect(() => {
+    if (isStreaming) {
+      console.log("useEffect: isStreaming", cancelAutoScrollRef.current);
+      cancelAutoScrollRef.current = false;
+    }
+  }, [isStreaming]);
+
   // debug effect
   useEffect(() => {
-    console.log("ChatMessages component mounted");
+    // console.log("ChatMessages component mounted");
   });
 
   // Auto-scroll to bottom on new messages and check if scroll button should be shown
   useEffect(() => {
     // For new messages, scroll immediately
     if (messagesContainerRef.current) {
-      console.log("useEffect: scrollToBottom");
       if (isStreaming) {
-        scrollToBottom(false);
+        if (!cancelAutoScrollRef.current) {
+          console.log("useEffect: scrollToBottom false");
+          scrollToBottom(false);
+        }
       } else {
         // For completed messages, use smooth scrolling
+        console.log("useEffect: scrollToBottom true");
         scrollToBottom(true);
       }
     }
