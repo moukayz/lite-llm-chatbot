@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { defaultSystemPrompt } from '../config/systemPrompt';
 import { ChatInput } from './ChatInput';
 import { ChatMessages } from './ChatMessages';
@@ -10,7 +10,13 @@ import { Sidebar } from './Sidebar';
 import { DebugPanel } from './DebugPanel';
 import { Menu } from 'lucide-react';
 import { ChatSession } from './ChatHistory';
-import { createChatSession, fetchChatSessions, fetchChatSessionMessages, updateChatSession } from '../services/chatSessionService';
+// import { createChatSession, fetchChatSessions, fetchChatSessionMessages, updateChatSession } from '../services/chatSessionService';
+import {
+  createChatSession,
+  fetchChatSessions,
+  fetchChatSessionMessages,
+  updateChatSession,
+} from "../services/chatSessionServiceFactory";
 
 const availableModels: Model[] = [
   { name: '通义千问-Max', code: 'qwen-max' },
@@ -71,6 +77,7 @@ export function ChatArea() {
     setChatSettings((prev) => ({ ...prev, ...updates }));
   };
 
+  const isNewMessageRef = useRef<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -81,6 +88,11 @@ export function ChatArea() {
 
   // Fetch chat sessions on component mount
   useEffect(() => {
+    if (isNewMessageRef.current && activeChatId === null) {
+      isNewMessageRef.current = false;
+      return;
+    }
+
     const loadChatSessions = async () => {
       try {
         const sessions = await fetchChatSessions();
@@ -122,6 +134,7 @@ export function ChatArea() {
   const handleNewChat = async () => {
     setMessages([]);
     setActiveChatId(null);
+    isNewMessageRef.current = true;
   };
 
   // Update chat session on server when final message is received

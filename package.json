@@ -6,14 +6,18 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:setup": "tsx app/scripts/setupDb.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.7.0",
     "highlight.js": "^11.11.1",
     "katex": "^0.16.22",
     "lucide-react": "^0.503.0",
     "next": "15.3.1",
     "openai": "^4.96.0",
+    "postgres": "^3.4.5",
+    "prisma": "^6.7.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
@@ -35,6 +39,8 @@
     "prettier": "^3.5.3",
     "prettier-eslint": "^16.4.1",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.4",
     "typescript": "^5"
   }
 }

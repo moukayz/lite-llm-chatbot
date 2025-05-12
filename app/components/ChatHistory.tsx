@@ -59,6 +59,7 @@ export const ChatHistory: FC<ChatHistoryProps> = ({
 
 // Helper function to format date as "Today at 2:30 PM" or "Feb 5 at 2:30 PM"
 const formatDate = (date: Date): string => {
+  console.log('date', date, typeof date);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
