@@ -18,9 +18,6 @@ export const ChatMessages = React.memo(function ChatMessages({
   const lastScrollPositionRef = useRef<number>(0);
   const cancelAutoScrollRef = useRef<boolean>(false);
 
-  // Handle scrolling
-  // console.log("showScrollButton: ", showScrollButton);
-  // console.log("ChatMessages rendered");
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       // console.log("handleScroll: ", e.currentTarget.scrollTop, lastScrollPositionRef.current);
@@ -103,28 +100,25 @@ export const ChatMessages = React.memo(function ChatMessages({
 
   return (
     <div className="relative h-full">
-      <div
-        ref={ScrollContainerRef}
-        className="h-full flex flex-col overflow-y-auto"
-        onScroll={handleScroll}
-      >
-        <div ref={messagesContainerRef} className="flex flex-col pb-25">
-          {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center px-4">
-              <h3 className="text-2xl font-semibold mb-2">Lite LLM Chat</h3>
-              <p className="text-gray-600 mb-6 max-w-md">
-                Start a conversation with our AI assistant powered by LLM
-                models.
-              </p>
-            </div>
-          )}
+      {messages.length === 0 && (
+        <div className="h-full flex flex-col items-center justify-center text-center px-4">
+          <h3 className="text-2xl font-semibold mb-2">Lite LLM Chat</h3>
+          <p className="text-gray-600 mb-6 max-w-md">
+            Start a conversation with our AI assistant powered by LLM models.
+          </p>
+        </div>
+      )}
 
-          <ChatMessageList
-            messages={messages}
-            isStreaming={isStreaming}
-          />
+      {messages.length > 0 && (
+        <div
+          ref={ScrollContainerRef}
+          className="h-full flex flex-col overflow-y-auto"
+          onScroll={handleScroll}
+        >
+          <div ref={messagesContainerRef} className="flex flex-col pb-25">
+            <ChatMessageList messages={messages} isStreaming={isStreaming} />
 
-          {/* {isLoading && (
+            {/* {isLoading && (
             <div className="py-5 bg-gray-50" ref={lastMessageRef}>
               <div className="max-w-3xl mx-auto px-4">
                 <div className="flex items-start">
@@ -139,19 +133,20 @@ export const ChatMessages = React.memo(function ChatMessages({
               </div>
             </div>
           )} */}
-        </div>
+          </div>
 
-        {/* Scroll to bottom button */}
-        {showScrollButton && (
-          <button
-            onClick={() => scrollToBottom(true)}
-            className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700 transition-all flex items-center justify-center z-50"
-            aria-label="Scroll to bottom"
-          >
-            <ChevronDown size={24} />
-          </button>
-        )}
-      </div>
+          {/* Scroll to bottom button */}
+          {showScrollButton && (
+            <button
+              onClick={() => scrollToBottom(true)}
+              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700 transition-all flex items-center justify-center z-50"
+              aria-label="Scroll to bottom"
+            >
+              <ChevronDown size={24} />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }); 
