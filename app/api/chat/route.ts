@@ -67,6 +67,7 @@ export async function POST(request: Request) {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache, no-transform',
+        'Transfer-Encoding': 'chunked',
         'Connection': 'keep-alive',
       },
     });

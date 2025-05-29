@@ -17,6 +17,7 @@ import {
   fetchChatSessionMessages,
   updateChatSession,
 } from "../services/chatSessionServiceFactory";
+import React from 'react';
 
 const availableModels: Model[] = [
   { name: '通义千问-Max', code: 'qwen-max' },
@@ -66,7 +67,7 @@ const ChatHeader = ({
   );
 };
 
-export function ChatArea() {
+export const ChatArea = React.memo(function ChatArea() {
   const [chatSettings, setChatSettings] = useState({
     systemPrompt: defaultSystemPrompt,
     model: availableModels[0],
@@ -111,6 +112,7 @@ export function ChatArea() {
       }
     };
 
+    console.log('loadChatSessions');
     loadChatSessions();
   }, [activeChatId]);
 
@@ -200,7 +202,7 @@ export function ChatArea() {
     console.error("Chat error:", error);
   }, []);
 
-  const {isStreaming, sendMessage } = useChat({
+  const { isStreaming, sendMessage } = useChat({
     onStreamUpdate: handleStreamUpdate,
     onError: handleError,
     onFinalResponse: handleFinalResponse,
@@ -238,7 +240,7 @@ export function ChatArea() {
   }, []);
 
   return (
-    <div className="z-10 w-full flex flex-row relative h-screen overflow-hidden">
+    <div className="w-full flex flex-row relative h-full overflow-hidden">
       {/* Sidebar - Always render but translate when hidden */}
       <Sidebar
         chatSettings={chatSettings}
@@ -299,4 +301,4 @@ export function ChatArea() {
       </div>
     </div>
   );
-} 
+}); 

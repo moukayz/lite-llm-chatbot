@@ -32,7 +32,7 @@ export function MessageContent({ content, isStreaming = false }: MessageProps) {
       <div className={`bg-gray-50 py-5`}>
         <div className="max-w-3xl mx-auto px-4">
           <div className={`flex items-start justify-start`}>
-            <div className="prose prose-sm max-w-none">
+            <div className="prose max-w-none">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeKatex, rehypeHighlight]}
