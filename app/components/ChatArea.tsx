@@ -5,7 +5,7 @@ import { defaultSystemPrompt } from '../config/systemPrompt';
 import { ChatInput } from './ChatInput';
 import { ChatMessages } from './ChatMessages';
 import { ChatSettings, Message, Model } from '../types/chat';
-import { useChat } from '../hooks/useChat';
+import { useChat, MessageChunk } from '../hooks/useChat';
 import { Sidebar } from './Sidebar';
 import { DebugPanel } from './DebugPanel';
 import { Menu } from 'lucide-react';
@@ -23,6 +23,7 @@ const availableModels: Model[] = [
   { name: '通义千问-Max', code: 'qwen-max' },
   { name: '通义千问-Plus', code: 'qwen-plus' },
   { name: '通义千问-Turbo', code: 'qwen-turbo' },
+  { name: 'Qwen3.2-235B-A22B', code: 'qwen3-235b-a22b' },
 ];
 
 interface ChatHeaderProps {
@@ -181,12 +182,18 @@ export const ChatArea = React.memo(function ChatArea() {
   }, [isFinalMessageReceived, messages, activeChatId]);
 
   // Streaming update handler
-  const handleStreamUpdate = useCallback((updatedContent: string) => {
+  const handleStreamUpdate = useCallback((updatedContent: MessageChunk) => {
     setMessages((prev) => {
       const newMessages = [...prev];
       // Update the last message with the new content
       if (newMessages.length > 0) {
-        newMessages[newMessages.length - 1].content = updatedContent;
+        const lastMessage = newMessages[newMessages.length - 1];
+        if (updatedContent.type === 'thinking') {
+          lastMessage.thinkingContent = updatedContent.text;
+        } else {
+          lastMessage.content = updatedContent.text;
+        }
+      console.log('lastMessage', lastMessage);
       }
       return newMessages;
     });

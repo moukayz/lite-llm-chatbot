@@ -35,11 +35,13 @@ export async function POST(request: Request) {
     console.log(`Using model: ${modelToUse}`);
 
     // Create a streaming response
+    // @ts-expect-error  skip check for extra_body
     const stream = await openai.chat.completions.create({
       model: modelToUse,
       messages,
       temperature: 0.7,
       max_tokens: 2000,
+      extra_body: { "enable_thinking": true },
       stream: true, // Enable streaming
     });
 
@@ -50,10 +52,21 @@ export async function POST(request: Request) {
     const readableStream = new ReadableStream({
       async start(controller) {
         for await (const chunk of stream) {
-          const text = chunk.choices[0]?.delta?.content || '';
-          if (text) {
-            const data = `data: ${JSON.stringify({ text })}\n\n`
-            // console.log(data);
+          const delta = chunk.choices[0]?.delta;
+          if (!delta) continue;
+
+          let data = null;
+          // console.log('delta', delta);
+          if (
+            "reasoning_content" in delta &&
+            delta.reasoning_content !== null
+          ) {
+              data = `data: ${JSON.stringify({ text: delta.reasoning_content, type: "thinking" })}\n\n`;
+          } else if (delta.content !== null) {
+            data = `data: ${JSON.stringify({ text: delta.content, type: "answer" })}\n\n`;
+          }
+          if (data) {
+            // console.log('data', data);
             controller.enqueue(encoder.encode(data));
           }
         }

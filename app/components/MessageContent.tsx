@@ -5,9 +5,14 @@ import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight"; // optional for code highlight
 import "highlight.js/styles/github.css"; // or any style you like
 import "katex/dist/katex.min.css";
+import { Message } from "../types/chat";
+import { CollapsibleLine } from "./CollapsibleLine";
 
 function normalizeMathMarkdown(markdown: string): string {
-  const text = markdown.replace(/\\\[(.*?)\\\]/gs, (_, inside) => `$$${inside}$$`);
+  const text = markdown.replace(
+    /\\\[(.*?)\\\]/gs,
+    (_, inside) => `$$${inside}$$`
+  );
   return text;
   // return markdown.replace(
   //   /(^|[\n\r]\s*)\\\[(.*?)\\\]($|[\n\r])/gs,
@@ -16,35 +21,60 @@ function normalizeMathMarkdown(markdown: string): string {
 }
 
 type MessageProps = {
-  content: string;
+  content: Message;
   isStreaming?: boolean;
 };
 
-export function MessageContent({ content, isStreaming = false }: MessageProps) {
+export function AssistantMessageContent({
+  content,
+  isStreaming = false,
+}: MessageProps) {
+  let mainBlock = null;
   if (!content) {
-    return (
-      isStreaming && (
-        <span className="inline-block w-2 h-4 bg-gray-400 animate-pulse"></span>
-      )
+    mainBlock = isStreaming && (
+      <span className="inline-block w-2 h-4 bg-gray-400 animate-pulse"></span>
     );
   } else {
-    return (
-      <div className={`bg-gray-50 py-5`}>
-        <div className="max-w-3xl mx-auto px-4">
-          <div className={`flex items-start justify-start`}>
-            <div className="prose max-w-none">
+    const isThinking = content.content.length === 0;
+    mainBlock = (
+      <>
+        {content.thinkingContent && (
+          <CollapsibleLine
+            heading={isThinking ? "Thinking" : "Thought Process"}
+            isOpen={isThinking}
+          >
+            <div className="bg-gray-100 rounded-md p-4 text-gray-500 prose max-w-none pt-2">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeKatex, rehypeHighlight]}
               >
-                {normalizeMathMarkdown(content)}
+                {normalizeMathMarkdown(content.thinkingContent)}
               </ReactMarkdown>
             </div>
-          </div>
+          </CollapsibleLine>
+        )}
+
+        <div className="pt-2 prose max-w-none">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[rehypeKatex, rehypeHighlight]}
+          >
+            {normalizeMathMarkdown(content.content)}
+          </ReactMarkdown>
         </div>
-      </div>
+      </>
     );
   }
+
+  return (
+    <div className={`bg-gray-50 py-5`}>
+      <div className="max-w-3xl mx-auto px-4">
+        <div className={`flex flex-col items-start justify-start`}>
+          {mainBlock}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function UserMessageContent({ content }: { content: string }) {
@@ -52,9 +82,7 @@ export function UserMessageContent({ content }: { content: string }) {
     <div className={`bg-gray-50  py-10`}>
       <div className="max-w-3xl mx-auto px-4">
         <div className={`flex items-start justify-end`}>
-          <div className={`bg-gray-200 rounded-full py-4 px-8`}>
-            {content}
-          </div>
+          <div className={`bg-gray-200 rounded-full py-4 px-8`}>{content}</div>
         </div>
       </div>
     </div>

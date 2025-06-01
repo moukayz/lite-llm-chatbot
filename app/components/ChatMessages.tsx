@@ -117,25 +117,8 @@ export const ChatMessages = React.memo(function ChatMessages({
         >
           <div ref={messagesContainerRef} className="flex flex-col pb-25">
             <ChatMessageList messages={messages} isStreaming={isStreaming} />
-
-            {/* {isLoading && (
-            <div className="py-5 bg-gray-50" ref={lastMessageRef}>
-              <div className="max-w-3xl mx-auto px-4">
-                <div className="flex items-start">
-                  <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center mr-3 flex-shrink-0">
-                    A
-                  </div>
-                  <div className="flex-1">
-                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse mb-2"></div>
-                    <div className="h-4 w-48 bg-gray-200 rounded animate-pulse"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )} */}
           </div>
 
-          {/* Scroll to bottom button */}
           {showScrollButton && (
             <button
               onClick={() => scrollToBottom(true)}

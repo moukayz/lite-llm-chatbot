@@ -1,6 +1,7 @@
 export type Message = {
   role: 'user' | 'assistant' | 'system';
   content: string;
+  thinkingContent?: string;
 };
 
 export type Model = {

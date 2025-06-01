@@ -5,10 +5,18 @@ import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight'; // optional for code highlight
 import 'highlight.js/styles/github.css'; // or any style you like
 import 'katex/dist/katex.min.css';
+import { CollapsibleLine } from '../components/CollapsibleLine';
 
 const message = `
 
+
+> 这是一个引用
+> hello world
+
+> test
+
 ### 2. **网络爬虫**
+
 \`requests\`、\`BeautifulSoup\` 和 \`Scrapy\` 等。
 
 - **库**：\`requests\`、\`BeautifulSoup\` 和 \`Scrapy\` 等。
@@ -86,26 +94,19 @@ export default function Test() {
   return (
     <main className="flex min-h-screen flex-col items-center m-8 p-4 sm:p-8 md:p-24 bg-gray-50">
       <div className="p-20 m-20 max-w-none bg-gray-100">
+        <CollapsibleLine heading="Hello">
+          <p>
+            This is the content of the collapsible line.
+            This is the content of the collapsible line.
+            This is the content of the collapsible line.
+            This is the content of the collapsible line.
+          </p>
+        </CollapsibleLine>
         <div className="prose prose-sm sm:prose lg:prose-lg max-w-none">
           <ReactMarkdown
             // remarkPlugins={[remarkGfm]}
             remarkPlugins={[remarkGfm, remarkMath]}
             rehypePlugins={[rehypeKatex, rehypeHighlight]}
-            // components={{
-            //   code({ node, inline, className, children, ...props }: any) {
-            //     return inline ? (
-            //       <code className=" rounded px-1 py-0.5">
-            //         {children}
-            //       </code>
-            //     ) : (
-            //       <pre className="bg-yellow-100 rounded-md p-4 overflow-x-auto">
-            //         <code className={className} {...props}>
-            //           {children}
-            //         </code>
-            //       </pre>
-            //     );
-            //   },
-            // }}
           >
             {normalizeMathMarkdown(message)}
           </ReactMarkdown>

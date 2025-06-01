@@ -1,27 +1,29 @@
 import { useState } from 'react';
 import { Message } from '../types/chat';
 
+export type MessageChunk = {
+  text: string;
+  type: 'thinking' | 'answer';
+}
+
 interface UseChatOptions {
   onError?: (error: Error) => void;
-  onStreamUpdate?: (updatedContent: string) => void;
+  onStreamUpdate?: (updatedContent: MessageChunk) => void;
   onFinalResponse?: (finalContent: string) => void;
 }
 
 export function useChat(options?: UseChatOptions) {
-  const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
 
   const sendMessage = async (
     messages: Message[],
     modelCode: string
   ): Promise<Message> => {
-    setIsLoading(true);
     
     try {
       // Create new assistant message that we'll stream into
       const assistantMessage: Message = { role: 'assistant', content: '' };
       
-      setIsLoading(false);
       setIsStreaming(true);
       console.log('Sending message:', messages);
 
@@ -49,6 +51,7 @@ export function useChat(options?: UseChatOptions) {
       const decoder = new TextDecoder();
       let done = false;
       let accumulatedContent = '';
+      let thinkingContent = '';
 
       while (!done) {
         const { value, done: doneReading } = await reader.read();
@@ -65,16 +68,26 @@ export function useChat(options?: UseChatOptions) {
             if (line === '[DONE]') continue;
             
             try {
-              const { text } = JSON.parse(line);
-              if (text) {
+              console.log('line', line);
+              const { text, type } = JSON.parse(line);
+              let currentContent = "";
+              if (type === "thinking") {
+                thinkingContent += text;
+                currentContent = thinkingContent;
+              } else {
                 accumulatedContent += text;
-                // Update the assistant message with new content
-                assistantMessage.content = accumulatedContent;
-                
-                // Call the callback if provided to update UI in real-time
-                if (options?.onStreamUpdate) {
-                  options.onStreamUpdate(accumulatedContent);
-                }
+                currentContent = accumulatedContent;
+              }
+
+              // // Update the assistant message with new content
+              // assistantMessage.content = accumulatedContent;
+
+              // Call the callback if provided to update UI in real-time
+              if (options?.onStreamUpdate) {
+                options.onStreamUpdate({
+                  text: currentContent,
+                  type: type,
+                });
               }
             } catch (err) {
               console.error('Error parsing stream data:', err);
@@ -102,13 +115,11 @@ export function useChat(options?: UseChatOptions) {
         content: 'Sorry, I encountered an error. Please try again.' 
       };
     } finally {
-      setIsLoading(false);
       setIsStreaming(false);
     }
   };
 
   return {
-    isLoading,
     isStreaming,
     sendMessage,
   };

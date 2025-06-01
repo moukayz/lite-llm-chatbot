@@ -18,6 +18,7 @@ interface RawChatSession {
 interface RawMessage {
   role: string;
   content: string;
+  thinkingContent: string;
 }
 
 // Helper function to convert date strings to Date objects for ChatSession
@@ -112,7 +113,8 @@ export const fetchChatSessionMessages = async (sessionId: string): Promise<Messa
     // Ensure messages match the Message type
     return data.messages.map((msg: RawMessage): Message => ({
       role: msg.role as 'user' | 'assistant' | 'system',
-      content: msg.content
+      content: msg.content,
+      thinkingContent: msg.thinkingContent
     }));
   } catch (error) {
     console.error(`Error fetching messages for chat session ${sessionId}:`, error);

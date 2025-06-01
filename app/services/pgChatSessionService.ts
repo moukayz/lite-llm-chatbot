@@ -23,9 +23,18 @@ interface DbMessage {
   id: number;
   role: string;
   content: string;
+  thinkingContent: string;
   sessionId: string;
   createdAt: Date;
 }
+
+const createMessage = (message: Message) => {
+  return {
+    role: message.role,
+    content: message.content,
+    thinkingContent: message.thinkingContent ?? "",
+  };
+};
 
 export const createChatSession = async (messages: Message[]): Promise<ChatSession> => {
   // Filter out system messages to find the first user message
@@ -45,10 +54,7 @@ export const createChatSession = async (messages: Message[]): Promise<ChatSessio
         createdAt: new Date(),
         updatedAt: new Date(),
         messages: {
-          create: messages.map(msg => ({
-            role: msg.role,
-            content: msg.content
-          }))
+          create: messages.map(createMessage)
         }
       }
     });
@@ -91,10 +97,7 @@ export const updateChatSession = async (
         firstMessage: firstContent,
         updatedAt: new Date(),
         messages: {
-          create: messages.map(msg => ({
-            role: msg.role,
-            content: msg.content
-          }))
+          create: messages.map(createMessage)
         }
       }
     });
@@ -145,7 +148,8 @@ export const fetchChatSessionMessages = async (sessionId: string): Promise<Messa
     // Convert database models to application models
     return messages.map((msg: DbMessage) => ({
       role: msg.role as 'user' | 'assistant' | 'system',
-      content: msg.content
+      content: msg.content,
+      thinkingContent: msg.thinkingContent
     }));
   } catch (error) {
     console.error(`Failed to fetch messages for chat session ${sessionId} from database:`, error);

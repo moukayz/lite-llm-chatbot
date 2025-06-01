@@ -12,6 +12,8 @@ const Header = () => {
   const links = [
     { href: "/", label: "Chat" },
     { href: "/about", label: "About" },
+    { href: "/test", label: "Test" },
+    { href: "/test2", label: "Test2" },
   ];
 
   return (
