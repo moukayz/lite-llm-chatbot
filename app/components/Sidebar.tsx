@@ -28,7 +28,7 @@ export function Sidebar({
   onSelectChat,
 }: SidebarProps) {
   const [isResizing, setIsResizing] = useState(false);
-  const [localSidebarWidth, setLocalSidebarWidth] = useState(500);
+  const [localSidebarWidth, setLocalSidebarWidth] = useState(350);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const MIN_WIDTH = 180;
   const MAX_WIDTH = 500;
