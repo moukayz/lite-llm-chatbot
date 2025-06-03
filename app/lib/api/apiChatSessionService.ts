@@ -1,5 +1,5 @@
-import { Message } from "../types/chat";
-import { ChatSession } from "../components/ChatHistory";
+import { Message } from "../../types/chat";
+import { ChatSession } from "../../components/ChatHistory";
 
 // API client for chat sessions
 const API_BASE_URL = '/api/chat/sessions';

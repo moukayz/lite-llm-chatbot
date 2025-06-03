@@ -10,13 +10,12 @@ import { Sidebar } from './Sidebar';
 import { DebugPanel } from './DebugPanel';
 import { Menu } from 'lucide-react';
 import { ChatSession } from './ChatHistory';
-// import { createChatSession, fetchChatSessions, fetchChatSessionMessages, updateChatSession } from '../services/chatSessionService';
 import {
   createChatSession,
   fetchChatSessions,
   fetchChatSessionMessages,
   updateChatSession,
-} from "../services/chatSessionServiceFactory";
+} from "../lib/api/chatSessionServiceFactory";
 import React from 'react';
 
 const availableModels: Model[] = [

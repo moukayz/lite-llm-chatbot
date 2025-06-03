@@ -1,5 +1,5 @@
-import { Message } from "../types/chat";
-import { ChatSession } from "../components/ChatHistory";
+import { Message } from "../../types/chat";
+import { ChatSession } from "../../components/ChatHistory";
 
 // Storage keys
 const CHAT_SESSIONS_KEY = "lite-llm-chat-sessions";
