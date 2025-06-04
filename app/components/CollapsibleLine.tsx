@@ -2,22 +2,36 @@
 
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import ShimmerText from "./ShimmerText";
 
 /** A single line of text that toggles extra content below it. */
 export function CollapsibleLine({
   heading,
   children,
   isOpen,
+  isShimmering,
 }: {
   heading: string;
   children: ReactNode;
   isOpen: boolean;
+  isShimmering: boolean;
 }) {
   const [open, setOpen] = useState(isOpen);
+  const [isShimmeringState, setIsShimmeringState] = useState(isShimmering);
 
   useEffect(() => {
     setOpen(isOpen);
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isShimmering) {
+      setTimeout(() => {
+        setIsShimmeringState(true);
+      }, 1000);
+    } else {
+      setIsShimmeringState(false);
+    }
+  }, [isShimmering]);
 
   console.log(`render collapsible line, isOpen: ${isOpen}, open: ${open}`);
 
@@ -29,7 +43,7 @@ export function CollapsibleLine({
         onClick={() => setOpen(!open)}
         className="inline-flex items-center text-left font-medium hover:text-blue-600 focus:outline-none cursor-pointer"
       >
-        {heading}
+        {isShimmeringState ? <ShimmerText text={heading} className="text-gray-900" /> : heading}
         {open ? (
           <ChevronDown size={20} className="mr-1" />
         ) : (

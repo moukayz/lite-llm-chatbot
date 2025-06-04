@@ -115,7 +115,7 @@ export const ChatMessages = React.memo(function ChatMessages({
           className="h-full flex flex-col overflow-y-auto"
           onScroll={handleScroll}
         >
-          <div ref={messagesContainerRef} className="flex flex-col pb-25">
+          <div ref={messagesContainerRef} className="flex flex-col pb-40">
             <ChatMessageList messages={messages} isStreaming={isStreaming} />
           </div>
 

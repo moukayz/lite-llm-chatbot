@@ -25,6 +25,28 @@ type MessageProps = {
   isStreaming?: boolean;
 };
 
+const ThinkingContent: React.FC<{ content: string; isThinking: boolean }> = ({
+  content,
+  isThinking,
+}) => {
+  return (
+    <CollapsibleLine
+      heading={isThinking ? "Thinking" : "Thought Process"}
+      isOpen={isThinking}
+      isShimmering={isThinking}
+    >
+      <div className="bg-gray-100 rounded-md p-4 text-gray-500 prose max-w-none pt-2">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex, rehypeHighlight]}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
+    </CollapsibleLine>
+  );
+};
+
 export function AssistantMessageContent({
   content,
   isStreaming = false,
@@ -39,19 +61,10 @@ export function AssistantMessageContent({
     mainBlock = (
       <>
         {content.thinkingContent && (
-          <CollapsibleLine
-            heading={isThinking ? "Thinking" : "Thought Process"}
-            isOpen={isThinking}
-          >
-            <div className="bg-gray-100 rounded-md p-4 text-gray-500 prose max-w-none pt-2">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[rehypeKatex, rehypeHighlight]}
-              >
-                {normalizeMathMarkdown(content.thinkingContent)}
-              </ReactMarkdown>
-            </div>
-          </CollapsibleLine>
+          <ThinkingContent
+            content={normalizeMathMarkdown(content.thinkingContent)}
+            isThinking={isThinking}
+          />
         )}
 
         <div className="pt-2 prose max-w-none">
