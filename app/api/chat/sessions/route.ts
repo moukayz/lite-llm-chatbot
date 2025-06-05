@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import * as pgChatSessionService from "../../../services/pgChatSessionService";
-import { Message } from "../../../types/chat";
+import * as pgChatSessionService from "services/pgChatSessionService";
+import { Message } from "types/chat";
 
 export async function GET() {
   try {

@@ -5,7 +5,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight'; // optional for code highlight
 import 'highlight.js/styles/github.css'; // or any style you like
 import 'katex/dist/katex.min.css';
-import { CollapsibleLine } from '../components/CollapsibleLine';
+import { CollapsibleLine } from '../../components/CollapsibleLine';
 
 const message = `
 

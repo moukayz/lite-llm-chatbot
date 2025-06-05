@@ -15,7 +15,7 @@ import {
   fetchChatSessions,
   fetchChatSessionMessages,
   updateChatSession,
-} from "../lib/api/chatSessionServiceFactory";
+} from "lib/api/chatSessionServiceFactory";
 import React from 'react';
 
 const availableModels: Model[] = [

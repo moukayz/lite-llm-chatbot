@@ -1,6 +1,6 @@
 import { OpenAI } from 'openai';
 import { NextResponse } from 'next/server';
-import { config } from '../../config';
+import { config } from '../../../config';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
