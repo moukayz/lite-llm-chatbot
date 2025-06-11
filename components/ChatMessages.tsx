@@ -100,15 +100,6 @@ export const ChatMessages = React.memo(function ChatMessages({
 
   return (
     <div className="relative h-full">
-      {messages.length === 0 && (
-        <div className="h-full flex flex-col items-center justify-center text-center px-4">
-          <h3 className="text-2xl font-semibold mb-2">Lite LLM Chat</h3>
-          <p className="text-gray-600 mb-6 max-w-md">
-            Start a conversation with our AI assistant powered by LLM models.
-          </p>
-        </div>
-      )}
-
       {messages.length > 0 && (
         <div
           ref={ScrollContainerRef}

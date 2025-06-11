@@ -15,6 +15,8 @@ export async function POST(request: Request) {
   try {
     const { messages, model } = await request.json();
 
+    console.warn("recv chat request, using model: ", model);
+
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
         { error: 'Messages are required and must be an array' },
@@ -32,7 +34,6 @@ export async function POST(request: Request) {
 
     // Use the provided model or fall back to the default
     const modelToUse = model || defaultModel;
-    console.log(`Using model: ${modelToUse}`);
 
     // Create a streaming response
     // @ts-expect-error  skip check for extra_body

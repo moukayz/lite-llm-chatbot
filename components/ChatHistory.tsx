@@ -1,45 +1,51 @@
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { MessageSquare, Clock } from "lucide-react";
-
-export interface ChatSession {
-  id: string;
-  title: string;
-  createdAt: Date;
-  updatedAt: Date;
-  messageCount: number;
-  firstMessage?: string;
-}
+import Link from "next/link";
+import { fetchChatSessions } from "@/lib/api/chatSessionServiceFactory";
+import { ChatSession } from "@/types/chat";
 
 interface ChatHistoryProps {
-  chatSessions: ChatSession[];
   activeChatId: string | null;
-  onSelectChat: (chatId: string) => void;
 }
 
 export const ChatHistory: FC<ChatHistoryProps> = ({
-  chatSessions,
   activeChatId,
-  onSelectChat,
 }) => {
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+
+  // Fetch chat sessions on component mount
+  useEffect(() => {
+    const loadChatSessions = async () => {
+      try {
+        const sessions = await fetchChatSessions();
+        console.log("history loadChatSessions, activeChatId: ", activeChatId);
+        setChatSessions(sessions);
+      } catch (error) {
+        console.error("Failed to load chat sessions:", error);
+      }
+    };
+
+    console.log("history render, activeChatId: ", activeChatId);
+    loadChatSessions();
+  }, [activeChatId]);
+
   if (chatSessions.length === 0) {
     return (
-      <div className="text-gray-400 text-center py-4">
-        No chat history yet
-      </div>
+      <div className="text-gray-400 text-center py-4">No chat history yet</div>
     );
   }
 
   return (
     <div className="space-y-2">
       {chatSessions.map((session) => (
-        <button
+        <Link
           key={session.id}
           className={`w-full text-left p-2 rounded-md flex items-start transition-colors ${
             activeChatId === session.id
               ? "bg-gray-700 text-white"
               : "text-gray-300 hover:bg-gray-800"
           }`}
-          onClick={() => onSelectChat(session.id)}
+          href={`/chat/${session.id}`}
         >
           <MessageSquare size={16} className="mr-2 mt-1 flex-shrink-0" />
           <div className="overflow-hidden flex-grow">
@@ -51,7 +57,7 @@ export const ChatHistory: FC<ChatHistoryProps> = ({
               {session.messageCount} messages
             </div>
           </div>
-        </button>
+        </Link>
       ))}
     </div>
   );
@@ -62,16 +68,16 @@ const formatDate = (date: Date): string => {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  
-  const timeString = date.toLocaleTimeString([], { 
-    hour: 'numeric', 
-    minute: '2-digit',
-    hour12: true 
+
+  const timeString = date.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
   });
 
   if (dateDay.getTime() === today.getTime()) {
     return `Today at ${timeString}`;
   } else {
-    return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })} at ${timeString}`;
+    return `${date.toLocaleDateString([], { month: "short", day: "numeric" })} at ${timeString}`;
   }
-}; 
+};

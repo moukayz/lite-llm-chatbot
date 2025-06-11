@@ -14,3 +14,12 @@ export type ChatSettings = {
   model: Model;
   availableModels: Array<Model>;
 };
+
+export type ChatSession = {
+  id: string;
+  title: string;
+  createdAt: Date;
+  updatedAt: Date;
+  messageCount: number;
+  firstMessage?: string;
+}

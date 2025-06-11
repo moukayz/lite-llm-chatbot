@@ -95,7 +95,7 @@ export function UserMessageContent({ content }: { content: string }) {
     <div className={`bg-gray-50  py-10`}>
       <div className="max-w-3xl mx-auto px-4">
         <div className={`flex items-start justify-end`}>
-          <div className={`bg-gray-200 rounded-full py-4 px-8`}>{content}</div>
+          <div className={`bg-gray-200 text-gray-800 rounded-full py-4 px-8`}>{content}</div>
         </div>
       </div>
     </div>

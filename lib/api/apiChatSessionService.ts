@@ -1,5 +1,4 @@
-import { Message } from "../../../types/chat";
-import { ChatSession } from "../../../components/ChatHistory";
+import { ChatSession, Message } from "@/types/chat";
 
 // API client for chat sessions
 const API_BASE_URL = '/api/chat/sessions';
@@ -73,6 +72,8 @@ export const updateChatSession = async (
       const errorData = await response.json();
       throw new Error(errorData.error || `Failed to update chat session ${sessionId}`);
     }
+
+    console.log("updateChatSession response", response);
 
     const data = await response.json() as RawChatSession;
     return deserializeChatSession(data);

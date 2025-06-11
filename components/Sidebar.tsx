@@ -1,37 +1,28 @@
 import { SystemPromptEditor } from "./SystemPromptEditor";
 import { ChatModelSelector } from "./ChatModelSettings";
-import { ChatSettings } from "../types/chat";
 import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
 import { PanelLeft, X } from "lucide-react";
 import { FoldableSection } from "./FoldableSection";
-import { ChatHistory, ChatSession } from "./ChatHistory";
+import { ChatHistory } from "./ChatHistory";
+import { useRouter } from "next/navigation";
 
 interface SidebarProps {
-  chatSettings: ChatSettings;
-  updateChatSettings: (updates: Partial<ChatSettings>) => void;
   isSidebarVisible: boolean;
   setSidebarVisible: Dispatch<SetStateAction<boolean>>;
-  handleNewChat: () => void;
-  chatSessions: ChatSession[];
   activeChatId: string | null;
-  onSelectChat: (chatId: string) => void;
 }
 
 export function Sidebar({
-  chatSettings,
-  updateChatSettings,
   isSidebarVisible,
   setSidebarVisible,
-  handleNewChat,
-  chatSessions,
   activeChatId,
-  onSelectChat,
 }: SidebarProps) {
   const [isResizing, setIsResizing] = useState(false);
   const [localSidebarWidth, setLocalSidebarWidth] = useState(350);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const MIN_WIDTH = 180;
   const MAX_WIDTH = 500;
+  const router = useRouter();
 
   // Handle mouse down on the resize handle
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -98,38 +89,25 @@ export function Sidebar({
         </div>
 
         <div className="flex-grow p-4 space-y-4 overflow-y-auto">
-          <FoldableSection title="Chat History">
-            <ChatHistory 
-              chatSessions={chatSessions}
-              activeChatId={activeChatId}
-              onSelectChat={onSelectChat}
-            />
+          <FoldableSection title="Chat History" isExpanded={true}>
+            <ChatHistory activeChatId={activeChatId} />
           </FoldableSection>
-          
+
           <FoldableSection title="System Prompt">
-            <SystemPromptEditor
-              updateSystemPrompt={(prompt) =>
-                updateChatSettings({ systemPrompt: prompt })
-              }
-              currentSystemPrompt={chatSettings.systemPrompt}
-            />
+            <SystemPromptEditor />
           </FoldableSection>
-          
+
           <FoldableSection title="Model Settings">
-            <ChatModelSelector
-              selectedModel={chatSettings.model}
-              updateSelectedModel={(new_model) =>
-                updateChatSettings({ model: new_model })
-              }
-              availableModels={chatSettings.availableModels}
-            />
+            <ChatModelSelector />
           </FoldableSection>
         </div>
 
         <div className="mt-6 py-6 border-t border-gray-700">
           <button
             className="w-full p-2 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm flex items-center justify-center"
-            onClick={handleNewChat}
+            onClick={() => {
+              router.push("/chat");
+            }}
           >
             <PanelLeft size={16} className="mr-2" />
             New Chat

@@ -1,15 +1,23 @@
-import { FormEvent, useRef, useEffect, KeyboardEvent, useState, memo, useCallback } from 'react';
-import { Send } from 'lucide-react';
-import { useTransition } from 'react';
+import {
+  FormEvent,
+  useRef,
+  useEffect,
+  KeyboardEvent,
+  useState,
+  memo,
+  useCallback,
+} from "react";
+import { Send } from "lucide-react";
+import { useTransition } from "react";
 
 interface ChatInputProps {
   handleSubmit: (input: string) => Promise<void>;
   isStreaming: boolean;
 }
 
-export const ChatInput = memo(function ChatInput({ 
-  handleSubmit, 
-  isStreaming 
+export const ChatInput = memo(function ChatInput({
+  handleSubmit,
+  isStreaming,
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [localInput, setLocalInput] = useState("");
@@ -66,10 +74,10 @@ export const ChatInput = memo(function ChatInput({
   );
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto p-3">
       <form
         onSubmit={onSubmit}
-        className="relative flex bg-white rounded-full border shadow-sm"
+        className="relative flex items-center justify-center bg-white rounded-full border shadow-sm"
       >
         <textarea
           ref={textareaRef}
@@ -77,16 +85,16 @@ export const ChatInput = memo(function ChatInput({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder="Message the AI..."
-          className="w-full resize-none py-3 pl-4 pr-10 max-h-[200px] rounded-lg focus:outline-none"
+          className="w-full resize-none py-5 pl-4 pr-10 max-h-[300px] rounded-full focus:outline-none"
           rows={1}
         />
         <button
           type="submit"
           disabled={isStreaming || !localInput.trim()}
-          className="absolute right-2 bottom-2 p-1.5 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 disabled:hover:bg-transparent disabled:opacity-40"
+          className=" p-2 pr-4 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 disabled:hover:bg-transparent disabled:opacity-40"
           aria-label="Send message"
         >
-          <Send size={20} className="rotate-90" />
+          <Send size={30} className="rotate-90" />
         </button>
       </form>
       <p className="text-xs text-center text-gray-500 mt-2">
@@ -96,4 +104,4 @@ export const ChatInput = memo(function ChatInput({
       </p>
     </div>
   );
-}); 
+});

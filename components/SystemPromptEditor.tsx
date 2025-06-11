@@ -1,33 +1,27 @@
 import { ChangeEvent, useState, useEffect } from 'react';
-import { defaultSystemPrompt } from '../config/systemPrompt';
+import { useContext } from 'react';
+import { ChatSettingsContext } from './chatSettingContext';
 
-interface SystemPromptEditorProps {
-  updateSystemPrompt: (newPrompt: string) => void;
-  currentSystemPrompt?: string;
-}
-
-export function SystemPromptEditor({ 
-  updateSystemPrompt, 
-  currentSystemPrompt = defaultSystemPrompt 
-}: SystemPromptEditorProps) {
-  const [editedPrompt, setEditedPrompt] = useState(currentSystemPrompt);
+export function SystemPromptEditor() {
+  const { chatSettings, updateChatSettings } = useContext(ChatSettingsContext);
+  const [editedPrompt, setEditedPrompt] = useState(chatSettings.systemPrompt);
   const [hasChanges, setHasChanges] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
   
   // Update edited prompt when the current system prompt changes
   useEffect(() => {
-    setEditedPrompt(currentSystemPrompt);
+    setEditedPrompt(chatSettings.systemPrompt);
     setHasChanges(false);
-  }, [currentSystemPrompt]);
+  }, [chatSettings.systemPrompt]);
   
   const handlePromptChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setEditedPrompt(e.target.value);
-    setHasChanges(e.target.value !== currentSystemPrompt);
+    setHasChanges(e.target.value !== chatSettings.systemPrompt);
     setIsApplied(false);
   };
   
   const handleApplyPrompt = () => {
-    updateSystemPrompt(editedPrompt);
+    updateChatSettings({ systemPrompt: editedPrompt });
     setIsApplied(true);
     setHasChanges(false);
   };

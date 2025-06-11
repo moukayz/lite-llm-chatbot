@@ -1,7 +1,6 @@
 import * as localStorageService from './chatSessionService';
 import * as apiService from './apiChatSessionService';
-import { Message } from '../../../types/chat';
-import { ChatSession } from '../../../components/ChatHistory';
+import { Message, ChatSession } from '@/types/chat';
 
 // Check if we should use PostgreSQL
 const shouldUsePostgres = (): boolean => {

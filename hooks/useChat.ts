@@ -88,6 +88,8 @@ export function useChat(options?: UseChatOptions) {
                   text: currentContent,
                   type: type,
                 });
+              } else {
+                console.warn("line: onStreamUpdate is not provided");
               }
             } catch (err) {
               console.error('Error parsing stream data:', err);
