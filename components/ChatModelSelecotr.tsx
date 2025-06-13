@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { ChatSettingsContext } from "./chatSettingContext";
-import CustomDropdown, { DropdownOption } from "./CustomDropdown";
+import ModelSelectorDropdown, { DropdownOption } from "./ModelSelectorDropdown";
 
 export function ChatModelSelector() {
   const { chatSettings, updateChatSettings } = useContext(ChatSettingsContext);
@@ -18,12 +18,10 @@ export function ChatModelSelector() {
   }));
 
   return (
-    <div className="flex flex-col justify-start items-start">
-      <CustomDropdown
-        options={modelOptions}
-        value={selectedModel.code}
-        onChange={handleOnChange}
-      />
-    </div>
+    <ModelSelectorDropdown
+      options={modelOptions}
+      value={selectedModel.code}
+      onChange={handleOnChange}
+    />
   );
 }

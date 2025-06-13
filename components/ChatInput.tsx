@@ -74,10 +74,10 @@ export const ChatInput = memo(function ChatInput({
   );
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-3">
+    <div className="w-full max-w-3xl mx-auto ">
       <form
         onSubmit={onSubmit}
-        className="relative flex items-center justify-center bg-white rounded-full border shadow-sm"
+        className="relative  overflow-hidden flex items-center justify-center bg-white rounded-full border shadow-sm"
       >
         <textarea
           ref={textareaRef}

@@ -8,7 +8,7 @@ import {
   ChatSettingsProvider,
 } from "@/components/chatSettingContext";
 import { usePathname } from "next/navigation";
-import { ChatModelSelector } from "@/components/ChatModelSettings";
+import { ChatModelSelector } from "@/components/ChatModelSelecotr";
 
 interface ChatHeaderProps {
   showSidebar: boolean;
@@ -35,7 +35,7 @@ const ChatHeader = ({
           <Menu size={20} />
         </button>
       )}
-      <div className="flex-grow">
+      <div className="flex-grow flex  items-center">
         <ChatModelSelector />
       </div>
       <button
@@ -94,7 +94,7 @@ export default function Layout({
 
           <div className="flex-1 flex overflow-hidden">
             {/* Chat content container */}
-            <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+            <div className="flex-1 flex flex-col overflow-hidden bg-white">
               {children}
             </div>
 

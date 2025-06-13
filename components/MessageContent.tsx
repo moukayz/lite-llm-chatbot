@@ -80,7 +80,7 @@ export function AssistantMessageContent({
   }
 
   return (
-    <div className={`bg-gray-50 py-5`}>
+    <div className={`py-5`}>
       <div className="max-w-3xl mx-auto px-4">
         <div className={`flex flex-col items-start justify-start`}>
           {mainBlock}
@@ -92,7 +92,7 @@ export function AssistantMessageContent({
 
 export function UserMessageContent({ content }: { content: string }) {
   return (
-    <div className={`bg-gray-50  py-10`}>
+    <div className={`py-10`}>
       <div className="max-w-3xl mx-auto px-4">
         <div className={`flex items-start justify-end`}>
           <div className={`bg-gray-200 text-gray-800 rounded-full py-4 px-8`}>{content}</div>
