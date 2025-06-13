@@ -1,5 +1,4 @@
 import { SystemPromptEditor } from "./SystemPromptEditor";
-import { ChatModelSelector } from "./ChatModelSettings";
 import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
 import { PanelLeft, X } from "lucide-react";
 import { FoldableSection } from "./FoldableSection";
@@ -97,9 +96,9 @@ export function Sidebar({
             <SystemPromptEditor />
           </FoldableSection>
 
-          <FoldableSection title="Model Settings">
+          {/* <FoldableSection title="Model Settings">
             <ChatModelSelector />
-          </FoldableSection>
+          </FoldableSection> */}
         </div>
 
         <div className="mt-6 py-6 border-t border-gray-700">

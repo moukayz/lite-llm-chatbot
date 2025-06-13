@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useCallback, useContext, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Menu } from "lucide-react";
 import React from "react";
 import {
-  ChatSettingsContext,
   ChatSettingsProvider,
 } from "@/components/chatSettingContext";
 import { usePathname } from "next/navigation";
+import { ChatModelSelector } from "@/components/ChatModelSettings";
 
 interface ChatHeaderProps {
   showSidebar: boolean;
@@ -23,7 +23,6 @@ const ChatHeader = ({
   showDebugPanel,
   toggleDebugPanel,
 }: ChatHeaderProps) => {
-  const { chatSettings } = useContext(ChatSettingsContext);
   return (
     <div className="bg-white shadow-sm border-b p-2 flex items-center">
       {!showSidebar && (
@@ -36,11 +35,9 @@ const ChatHeader = ({
           <Menu size={20} />
         </button>
       )}
-      <h2 className="text-lg font-medium flex-grow">
-        <span className="p-1 text-gray-600 rounded-md bg-yellow-200">
-          Chat with {chatSettings.model.name}
-        </span>
-      </h2>
+      <div className="flex-grow">
+        <ChatModelSelector />
+      </div>
       <button
         onClick={toggleDebugPanel}
         className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm font-medium flex items-center transition-colors"
@@ -74,7 +71,7 @@ export default function Layout({
     return () => {
       console.log("unmount layout in effect, id: ", id);
     };
-  }, []);
+  }, [id]);
 
   console.log("render layout, id: ", id);
   return (
