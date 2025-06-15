@@ -59,7 +59,7 @@ export function Sidebar({
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isResizing, setLocalSidebarWidth]);
+  }, [isResizing]);
 
   return (
     <aside

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Message } from '../types/chat';
 
 export type MessageChunk = {
@@ -9,13 +9,12 @@ export type MessageChunk = {
 interface UseChatOptions {
   onError?: (error: Error) => void;
   onStreamUpdate?: (updatedContent: MessageChunk) => void;
-  onFinalResponse?: (finalContent: string) => void;
 }
 
 export function useChat(options?: UseChatOptions) {
   const [isStreaming, setIsStreaming] = useState(false);
 
-  const sendMessage = async (
+  const sendMessage = useCallback(async (
     messages: Message[],
     modelCode: string
   ): Promise<Message> => {
@@ -98,11 +97,6 @@ export function useChat(options?: UseChatOptions) {
         }
       }
       
-      // Send the final, complete response when streaming is done
-      if (options?.onFinalResponse) {
-        options.onFinalResponse(accumulatedContent);
-      }
-
       return assistantMessage;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
@@ -119,7 +113,7 @@ export function useChat(options?: UseChatOptions) {
     } finally {
       setIsStreaming(false);
     }
-  };
+  },[options]);
 
   return {
     isStreaming,

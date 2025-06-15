@@ -1,4 +1,4 @@
-import { ChangeEvent, useState, useEffect } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { useContext } from 'react';
 import { ChatSettingsContext } from './chatSettingContext';
 
@@ -8,12 +8,6 @@ export function SystemPromptEditor() {
   const [hasChanges, setHasChanges] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
   
-  // Update edited prompt when the current system prompt changes
-  useEffect(() => {
-    setEditedPrompt(chatSettings.systemPrompt);
-    setHasChanges(false);
-  }, [chatSettings.systemPrompt]);
-  
   const handlePromptChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setEditedPrompt(e.target.value);
     setHasChanges(e.target.value !== chatSettings.systemPrompt);
@@ -22,6 +16,7 @@ export function SystemPromptEditor() {
   
   const handleApplyPrompt = () => {
     updateChatSettings({ systemPrompt: editedPrompt });
+    setEditedPrompt(chatSettings.systemPrompt);
     setIsApplied(true);
     setHasChanges(false);
   };

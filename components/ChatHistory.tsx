@@ -1,8 +1,7 @@
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import { MessageSquare, Clock } from "lucide-react";
 import Link from "next/link";
-import { fetchChatSessions } from "@/lib/api/chatSessionServiceFactory";
-import { ChatSession } from "@/types/chat";
+import { useChatSession } from "@/hooks/useChatSession";
 
 interface ChatHistoryProps {
   activeChatId: string | null;
@@ -11,23 +10,8 @@ interface ChatHistoryProps {
 export const ChatHistory: FC<ChatHistoryProps> = ({
   activeChatId,
 }) => {
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
 
-  // Fetch chat sessions on component mount
-  useEffect(() => {
-    const loadChatSessions = async () => {
-      try {
-        const sessions = await fetchChatSessions();
-        console.log("history loadChatSessions, activeChatId: ", activeChatId);
-        setChatSessions(sessions);
-      } catch (error) {
-        console.error("Failed to load chat sessions:", error);
-      }
-    };
-
-    console.log("history render, activeChatId: ", activeChatId);
-    loadChatSessions();
-  }, [activeChatId]);
+  const { chatSessions} = useChatSession(activeChatId || "");
 
   if (chatSessions.length === 0) {
     return (

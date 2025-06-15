@@ -1,5 +1,6 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { useControlledState } from "@/hooks/useControlledState";
 
 interface FoldableSectionProps {
   title: string;
@@ -18,13 +19,14 @@ export function FoldableSection({
   titleClassName = "",
   contentClassName = "",
 }: FoldableSectionProps) {
-  const [isExpanded, setIsExpanded] = useState(controlledIsExpanded);
+  // const [isExpanded, setIsExpanded] = useState(controlledIsExpanded);
+  const [isExpanded, setIsExpanded] = useControlledState<boolean>(false, controlledIsExpanded);
   
-  useEffect(() => {
-    if (controlledIsExpanded !== undefined) {
-      setIsExpanded(controlledIsExpanded);
-    }
-  }, [controlledIsExpanded]);
+  // useEffect(() => {
+  //   if (controlledIsExpanded !== undefined) {
+  //     setIsExpanded(controlledIsExpanded);
+  //   }
+  // }, [controlledIsExpanded]);
 
   const toggleExpanded = () => {
     const newValue = !isExpanded;

@@ -41,13 +41,10 @@ export const ChatInput = memo(function ChatInput({
   );
 
   // Auto-resize textarea
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
-    }
-  }, [localInput]);
+  const textarea = textareaRef.current;
+  if (textarea) {
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+  }
 
   // Focus input on component mount
   useEffect(() => {

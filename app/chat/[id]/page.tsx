@@ -16,8 +16,8 @@ export default function Page({ params }: { params: Params }) {
 
   const { chatSettings } = useContext(ChatSettingsContext);
 
-  const needUpdateSession = useRef(false);
-  const isCurrentChatLoded = useRef(false);
+  const chatSettingsRef = useRef(chatSettings);
+  const isStreamingRef = useRef(false);
   const [messages, setMessages] = useState<Message[]>([]);
 
   const handleStreamUpdate = useCallback(
@@ -43,31 +43,8 @@ export default function Page({ params }: { params: Params }) {
         return newMessages;
       });
     },
-    [setMessages]
+    []
   );
-
-  // Final response handler
-  const handleFinalResponse = useCallback(() => {
-    needUpdateSession.current = true;
-  }, []);
-
-  useEffect(() => {
-    const updateSession = async () => {
-      if (messages.length > 0 && id) {
-        try {
-          await updateChatSession(id, messages);
-        } catch (error) {
-          console.error("Failed to update chat session:", error);
-        }
-      }
-    };
-
-    if (needUpdateSession.current) {
-      needUpdateSession.current = false;
-      console.log("updateSession", messages);
-      updateSession();
-    }
-  }, [messages, id]);
 
   // Error handler
   const handleError = useCallback((error: Error) => {
@@ -77,8 +54,34 @@ export default function Page({ params }: { params: Params }) {
   const { isStreaming, sendMessage } = useChat({
     onStreamUpdate: handleStreamUpdate,
     onError: handleError,
-    onFinalResponse: handleFinalResponse,
   });
+
+  useEffect(() => {
+    chatSettingsRef.current = chatSettings;
+  }, [chatSettings]);
+   
+  useEffect(() => {
+    const updateSession = async () => {
+      try {
+        await updateChatSession(id!, messages);
+      } catch (error) {
+        console.error("Failed to update chat session:", error);
+      }
+    };
+
+    let needUpdateSession = false;
+    if (isStreamingRef.current !== isStreaming) {
+      if (isStreamingRef.current) {
+        needUpdateSession = true;
+      }
+      isStreamingRef.current = isStreaming;
+    }
+
+    if (needUpdateSession && messages.length > 0 && id) {
+      console.log("updateSession", messages);
+      updateSession();
+    }
+  }, [messages, id, isStreaming]);
 
   const handleSubmit = async (input: string) => {
     if (!input.trim() || isStreaming) return;
@@ -105,9 +108,11 @@ export default function Page({ params }: { params: Params }) {
   };
 
   useEffect(() => {
+    let canceled = false;
+
     const fetchMessages = async () => {
-      if (!id) return;
-      const sessionMessages = await fetchChatSessionMessages(id);
+      const sessionMessages = await fetchChatSessionMessages(id!);
+      if (canceled) return;
       setMessages(sessionMessages);
 
       if (
@@ -121,32 +126,20 @@ export default function Page({ params }: { params: Params }) {
         });
 
         console.log(`${id} sendMessage from effect`, sessionMessages);
-        sendMessage(sessionMessages, chatSettings.model.code);
+        sendMessage(sessionMessages, chatSettingsRef.current.model.code);
       }
     };
 
-    console.log(
-      "fetchMessages from effect, id: ",
-      id,
-      isCurrentChatLoded.current
-    );
-    if (isCurrentChatLoded.current) {
-      return;
-    }
-
-    isCurrentChatLoded.current = true;
-    console.log(
-      "start fetchMessages from effect, id: ",
-      id,
-      isCurrentChatLoded.current
-    );
     fetchMessages();
+
+    return () => {
+      canceled = true;
+    };
   }, [id]);
 
   console.log(
     "render page, messages: ",
     messages,
-    isCurrentChatLoded.current,
     param
   );
 

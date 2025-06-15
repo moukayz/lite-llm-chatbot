@@ -48,10 +48,10 @@ export const ChatMessages = React.memo(function ChatMessages({
   );
 
   // Scroll to bottom function with smooth animation
-  const scrollToBottom = useCallback((isSmooth: boolean = true) => {
+  const scrollToBottom = useCallback(({ isSmooth = true }: { isSmooth?: boolean } = {}) => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollIntoView({
-        behavior: isSmooth ? "smooth" : "instant",
+        behavior: isSmooth ? "smooth" : "instant", 
         block: "end",
       });
     }
@@ -59,43 +59,19 @@ export const ChatMessages = React.memo(function ChatMessages({
 
   useEffect(() => {
     if (isStreaming) {
-      console.log("useEffect: isStreaming", cancelAutoScrollRef.current);
       cancelAutoScrollRef.current = false;
     }
   }, [isStreaming]);
 
-  // debug effect
-  useEffect(() => {
-    // console.log("ChatMessages component mounted");
-  });
-
-  // Auto-scroll to bottom on new messages and check if scroll button should be shown
   useEffect(() => {
     // For new messages, scroll immediately
     if (messagesContainerRef.current) {
-      if (isStreaming) {
-        if (!cancelAutoScrollRef.current) {
-          console.log("useEffect: scrollToBottom false");
-          scrollToBottom(false);
-        }
-      } else {
-        // For completed messages, use smooth scrolling
-        console.log("useEffect: scrollToBottom true");
-        scrollToBottom(true);
+      const shouldAutoScroll = !isStreaming || !cancelAutoScrollRef.current;
+      if (shouldAutoScroll) {
+        console.log("useEffect: scrollToBottom , isStreaming: ", isStreaming);
+        scrollToBottom({ isSmooth: !isStreaming });
       }
     }
-
-    // Use setTimeout to let the render complete before checking scroll position
-    // setTimeout(() => {
-    //   if (ScrollContainerRef.current) {
-    //     const { scrollHeight, clientHeight } = ScrollContainerRef.current;
-    //     // Only show button if content is scrollable
-    //     if (scrollHeight > clientHeight) {
-    //       console.log("set timeout: handleScroll");
-    //       handleScroll();
-    //     }
-    //   }
-    // }, 100);
   }, [messages, scrollToBottom, isStreaming]);
 
   return (
@@ -112,7 +88,7 @@ export const ChatMessages = React.memo(function ChatMessages({
 
           {showScrollButton && (
             <button
-              onClick={() => scrollToBottom(true)}
+              onClick={() => scrollToBottom({ isSmooth: true })}
               className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-700 transition-all flex items-center justify-center z-50"
               aria-label="Scroll to bottom"
             >
