@@ -57,7 +57,7 @@ export function AssistantMessageContent({
       <span className="inline-block w-2 h-4 bg-gray-400 animate-pulse"></span>
     );
   } else {
-    const isThinking = content.content.length === 0;
+    const isThinking = isStreaming && content.content.length === 0;
     mainBlock = (
       <>
         {content.thinkingContent && (

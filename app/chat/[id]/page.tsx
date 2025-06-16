@@ -48,7 +48,7 @@ export default function Page({ params }: { params: Params }) {
 
   // Error handler
   const handleError = useCallback((error: Error) => {
-    console.error("Chat error:", error);
+    console.warn("Chat error:", error);
   }, []);
 
   const useChatProps = useMemo(() => ({
@@ -56,7 +56,12 @@ export default function Page({ params }: { params: Params }) {
     onError: handleError,
   }), [handleStreamUpdate, handleError]);
 
-  const { isStreaming, sendMessage } = useChat(useChatProps);
+  const { isStreaming, sendMessage, abort } = useChat(useChatProps);
+
+  const handleAbort = useCallback(() => {
+    console.log("handleAbort, abort");
+    abort();
+  }, [abort]);
 
   useEffect(() => {
     chatSettingsRef.current = chatSettings;
@@ -155,7 +160,7 @@ export default function Page({ params }: { params: Params }) {
 
       {/* Floating Input area */}
       <div className="max-w-3xl mx-auto w-full bg-transparent px-3">
-        <ChatInput handleSubmit={handleSubmit} isStreaming={isStreaming} />
+        <ChatInput handleSubmit={handleSubmit} handleAbort={handleAbort} isStreaming={isStreaming} />
       </div>
     </div>
   );

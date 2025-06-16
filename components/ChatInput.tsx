@@ -7,16 +7,18 @@ import {
   memo,
   useCallback,
 } from "react";
-import { Send } from "lucide-react";
+import { CircleStop, Send } from "lucide-react";
 import { useTransition } from "react";
 
 interface ChatInputProps {
   handleSubmit: (input: string) => Promise<void>;
+  handleAbort: () => void;
   isStreaming: boolean;
 }
 
 export const ChatInput = memo(function ChatInput({
   handleSubmit,
+  handleAbort,
   isStreaming,
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -85,14 +87,25 @@ export const ChatInput = memo(function ChatInput({
           className="w-full resize-none py-5 pl-4 pr-10 max-h-[300px] rounded-full focus:outline-none"
           rows={1}
         />
-        <button
-          type="submit"
-          disabled={isStreaming || !localInput.trim()}
-          className=" p-2 pr-4 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 disabled:hover:bg-transparent disabled:opacity-40"
-          aria-label="Send message"
-        >
-          <Send size={30} className="rotate-90" />
-        </button>
+        {!isStreaming ? (
+          <button
+            type="submit"
+            disabled={!localInput.trim()}
+            className=" p-2 pr-4 rounded-md text-gray-700 hover:text-gray-500 hover:bg-gray-200 disabled:hover:bg-transparent disabled:opacity-40"
+            aria-label="Send message"
+          >
+            <Send size={30} className="rotate-90" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            className=" p-2 pr-4 rounded-md text-gray-700 hover:text-gray-500 hover:bg-gray-100 disabled:hover:bg-transparent disabled:opacity-40"
+            aria-label="Abort"
+            onClick={handleAbort}
+          >
+            <CircleStop size={30} className="rotate-90" />
+          </button>
+        )}
       </form>
       <p className="text-xs text-center text-gray-500 mt-2">
         {isStreaming

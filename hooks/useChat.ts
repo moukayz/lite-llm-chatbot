@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Message } from "../types/chat";
 
 export type MessageChunk = {
@@ -14,14 +14,20 @@ interface UseChatOptions {
 
 export function useChat(options: UseChatOptions) {
   const [isStreaming, setIsStreaming] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const sendMessage = useCallback(
     async (messages: Message[], modelCode: string): Promise<void> => {
+      setIsStreaming(true);
+
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
       try {
-        setIsStreaming(true);
         console.log("Sending message:", messages);
 
         const response = await fetch("/api/chat", {
+          signal: abortController.signal,
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -92,14 +98,16 @@ export function useChat(options: UseChatOptions) {
         }
 
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        console.error("Chat error:", errorMessage);
+        if (error instanceof Error) {
+           if (error.name === "AbortError") {
+            console.log("chat aborted");
+           } else {
+            console.error("Chat error:", error);
+           }
+         }
 
         if (options.onError) {
-          options.onError(
-            error instanceof Error ? error : new Error(errorMessage)
-          );
+          options.onError(error as Error);
         }
 
       } finally {
@@ -109,8 +117,15 @@ export function useChat(options: UseChatOptions) {
     [options]
   );
 
+  const abort = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  }, []);
+
   return {
     isStreaming,
     sendMessage,
+    abort,
   };
 }
