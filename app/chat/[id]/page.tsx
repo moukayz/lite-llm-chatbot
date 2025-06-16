@@ -20,31 +20,31 @@ export default function Page({ params }: { params: Params }) {
   const isStreamingRef = useRef(false);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const handleStreamUpdate = useCallback(
-    (updatedContent: MessageChunk) => {
-      console.log("handleStreamUpdate", updatedContent);
-      setMessages((prev) => {
-        console.log("handleStreamUpdate inside", updatedContent);
-        const newMessages = [...prev];
+  const handleStreamUpdate = useCallback((updatedContent: MessageChunk) => {
+    if (updatedContent.isDone) {
+      return;
+    }
 
-        if (newMessages.length > 0) {
-          const lastMessageIndex = newMessages.length - 1;
-          const lastMessage = { ...newMessages[lastMessageIndex] };
+    setMessages((prev) => {
+      console.log("handleStreamUpdate inside", updatedContent);
+      const newMessages = [...prev];
 
-          if (updatedContent.type === "thinking") {
-            lastMessage.thinkingContent = updatedContent.text;
-          } else {
-            lastMessage.content = updatedContent.text;
-          }
+      if (newMessages.length > 0) {
+        const lastMessageIndex = newMessages.length - 1;
+        const lastMessage = { ...newMessages[lastMessageIndex] };
 
-          newMessages[lastMessageIndex] = lastMessage;
-          console.log("lastMessage", lastMessage);
+        if (updatedContent.type === "thinking") {
+          lastMessage.thinkingContent = updatedContent.text;
+        } else {
+          lastMessage.content = updatedContent.text;
         }
-        return newMessages;
-      });
-    },
-    []
-  );
+
+        newMessages[lastMessageIndex] = lastMessage;
+        console.log("lastMessage", lastMessage);
+      }
+      return newMessages;
+    });
+  }, []);
 
   // Error handler
   const handleError = useCallback((error: Error) => {
