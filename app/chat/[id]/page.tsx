@@ -92,7 +92,7 @@ export default function Page({ params }: { params: Params }) {
 
     // update system prompt if necessary
     if (newMessages.length > 0 && newMessages[0].role === "system") {
-      newMessages[0].content = chatSettings.systemPrompt;
+      newMessages[0] = { ...newMessages[0], content:chatSettings.systemPrompt };
     } else {
       newMessages.unshift({
         role: "system",
@@ -115,7 +115,6 @@ export default function Page({ params }: { params: Params }) {
     const fetchMessages = async () => {
       const sessionMessages = await fetchChatSessionMessages(id!);
       if (canceled) return;
-      setMessages(sessionMessages);
 
       if (
         sessionMessages.length > 0 &&
@@ -130,6 +129,8 @@ export default function Page({ params }: { params: Params }) {
         console.log(`${id} sendMessage from effect`, sessionMessages);
         sendMessage(sessionMessages, chatSettingsRef.current.model.code);
       }
+
+      setMessages([...sessionMessages]);
     };
 
     fetchMessages();
