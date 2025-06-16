@@ -2,7 +2,7 @@
 
 import { ChatInput } from '@/components/ChatInput';
 import { ChatMessages } from '@/components/ChatMessages';
-import React, { use, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { use, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Message } from '@/types/chat';
 import { fetchChatSessionMessages, updateChatSession } from '@/lib/api/chatSessionServiceFactory';
 import { MessageChunk, useChat } from '@/hooks/useChat';
@@ -51,10 +51,12 @@ export default function Page({ params }: { params: Params }) {
     console.error("Chat error:", error);
   }, []);
 
-  const { isStreaming, sendMessage } = useChat({
+  const useChatProps = useMemo(() => ({
     onStreamUpdate: handleStreamUpdate,
     onError: handleError,
-  });
+  }), [handleStreamUpdate, handleError]);
+
+  const { isStreaming, sendMessage } = useChat(useChatProps);
 
   useEffect(() => {
     chatSettingsRef.current = chatSettings;
@@ -135,7 +137,7 @@ export default function Page({ params }: { params: Params }) {
     return () => {
       canceled = true;
     };
-  }, [id]);
+  }, [id, sendMessage]);
 
   console.log(
     "render page, messages: ",
