@@ -102,7 +102,7 @@ export function useChat(options: UseChatOptions) {
            if (error.name === "AbortError") {
             console.log("chat aborted");
            } else {
-            console.error("Chat error:", error);
+            // console.error("Chat error:", error);
            }
          }
 
