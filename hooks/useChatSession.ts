@@ -1,4 +1,4 @@
-import { fetchChatSessions } from "@/lib/api/apiChatSessionService";
+import { fetchChatSessions } from "@/lib/api/chatSessionServiceFactory";
 import { ChatSession } from "@/types/chat";
 import { useEffect, useState } from "react";
 
@@ -24,4 +24,4 @@ export const useChatSession = (activeChatId: string) => {
   }, [activeChatId]);
 
   return { chatSessions, isLoading };
-}
+};

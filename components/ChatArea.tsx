@@ -1,28 +1,28 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { defaultSystemPrompt } from '../config/systemPrompt';
-import { ChatInput } from './ChatInput';
-import { ChatMessages } from './ChatMessages';
-import { ChatSettings, Message, Model } from '../types/chat';
-import { useChat, MessageChunk } from '../hooks/useChat';
-import { Sidebar } from './Sidebar';
-import { DebugPanel } from './DebugPanel';
-import { Menu } from 'lucide-react';
-import { ChatSession } from './ChatHistory';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { defaultSystemPrompt } from "../config/systemPrompt";
+import { ChatInput } from "./ChatInput";
+import { ChatMessages } from "./ChatMessages";
+import { ChatSettings, Message, Model } from "../types/chat";
+import { useChat, MessageChunk } from "../hooks/useChat";
+import { Sidebar } from "./Sidebar";
+import { DebugPanel } from "./DebugPanel";
+import { Menu } from "lucide-react";
+import { ChatSession } from "./ChatHistory";
 import {
   createChatSession,
   fetchChatSessions,
   fetchChatSessionMessages,
   updateChatSession,
 } from "lib/api/chatSessionServiceFactory";
-import React from 'react';
+import React from "react";
 
 const availableModels: Model[] = [
-  { name: '通义千问-Max', code: 'qwen-max' },
-  { name: '通义千问-Plus', code: 'qwen-plus' },
-  { name: '通义千问-Turbo', code: 'qwen-turbo' },
-  { name: 'Qwen3.2-235B-A22B', code: 'qwen3-235b-a22b' },
+  { name: "通义千问-Max", code: "qwen-max" },
+  { name: "通义千问-Plus", code: "qwen-plus" },
+  { name: "通义千问-Turbo", code: "qwen-turbo" },
+  { name: "Qwen3.2-235B-A22B", code: "qwen3-235b-a22b" },
 ];
 
 interface ChatHeaderProps {
@@ -33,12 +33,12 @@ interface ChatHeaderProps {
   toggleDebugPanel: () => void;
 }
 
-const ChatHeader = ({ 
-  showSidebar, 
-  setShowSidebar, 
-  chatSettings, 
-  showDebugPanel, 
-  toggleDebugPanel 
+const ChatHeader = ({
+  showSidebar,
+  setShowSidebar,
+  chatSettings,
+  showDebugPanel,
+  toggleDebugPanel,
 }: ChatHeaderProps) => {
   return (
     <div className="bg-white shadow-sm border-b p-2 flex items-center">
@@ -103,7 +103,7 @@ export const ChatArea = React.memo(function ChatArea() {
         if (sessions.length > 0 && !activeChatId) {
           setActiveChatId(sessions[0].id);
           const sessionMessages = await fetchChatSessionMessages(
-            sessions[0].id
+            sessions[0].id,
           );
           setMessages(sessionMessages);
         }
@@ -112,7 +112,7 @@ export const ChatArea = React.memo(function ChatArea() {
       }
     };
 
-    console.log('loadChatSessions');
+    console.log("loadChatSessions");
     loadChatSessions();
   }, [activeChatId]);
 
@@ -127,7 +127,7 @@ export const ChatArea = React.memo(function ChatArea() {
     } catch (error) {
       console.error(
         `Failed to load messages for chat session ${chatId}:`,
-        error
+        error,
       );
     }
   };
@@ -157,7 +157,7 @@ export const ChatArea = React.memo(function ChatArea() {
           // Update the chat sessions list
           setChatSessions((prevSessions) => {
             const existingIndex = prevSessions.findIndex(
-              (s) => s.id === session.id
+              (s) => s.id === session.id,
             );
             if (existingIndex >= 0) {
               // Replace the existing session
@@ -182,17 +182,21 @@ export const ChatArea = React.memo(function ChatArea() {
 
   // Streaming update handler
   const handleStreamUpdate = useCallback((updatedContent: MessageChunk) => {
+    if (updatedContent.isDone) {
+      return;
+    }
+
     setMessages((prev) => {
       const newMessages = [...prev];
       // Update the last message with the new content
       if (newMessages.length > 0) {
         const lastMessage = newMessages[newMessages.length - 1];
-        if (updatedContent.type === 'thinking') {
+        if (updatedContent.type === "thinking") {
           lastMessage.thinkingContent = updatedContent.text;
         } else {
           lastMessage.content = updatedContent.text;
         }
-      console.log('lastMessage', lastMessage);
+        console.log("lastMessage", lastMessage);
       }
       return newMessages;
     });
@@ -217,7 +221,7 @@ export const ChatArea = React.memo(function ChatArea() {
   const handleSubmit = async (input: string) => {
     if (!input.trim() || isStreaming) return;
 
-    console.time('handleSubmit');
+    console.time("handleSubmit");
     const newMessages = [...messages];
 
     // update system prompt if necessary
@@ -234,7 +238,7 @@ export const ChatArea = React.memo(function ChatArea() {
     newMessages.push({ role: "assistant", content: "" });
     setMessages(newMessages);
 
-    console.timeEnd('handleSubmit');
+    console.timeEnd("handleSubmit");
 
     // Send the request with the system prompt included
     await sendMessage(newMessages, chatSettings.model.code);
@@ -282,10 +286,7 @@ export const ChatArea = React.memo(function ChatArea() {
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Messages area */}
             <div className="flex-1 flex flex-col overflow-hidden ">
-              <ChatMessages
-                messages={messages}
-                isStreaming={isStreaming}
-              />
+              <ChatMessages messages={messages} isStreaming={isStreaming} />
             </div>
 
             {/* Floating Input area */}
@@ -307,4 +308,4 @@ export const ChatArea = React.memo(function ChatArea() {
       </div>
     </div>
   );
-}); 
+});

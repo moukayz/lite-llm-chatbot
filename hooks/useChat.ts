@@ -9,6 +9,7 @@ export type MessageChunk = {
 
 interface UseChatOptions {
   onError?: (error: Error) => void;
+  onFinalResponse?: () => void;
   onStreamUpdate: (updatedContent: MessageChunk) => void;
 }
 
@@ -60,6 +61,7 @@ export function useChat(options: UseChatOptions) {
               type: "answer",
               isDone: true,
             });
+            options.onFinalResponse?.();
             break;
           }
 
@@ -96,25 +98,23 @@ export function useChat(options: UseChatOptions) {
             }
           }
         }
-
       } catch (error) {
         if (error instanceof Error) {
-           if (error.name === "AbortError") {
+          if (error.name === "AbortError") {
             console.log("chat aborted");
-           } else {
+          } else {
             // console.error("Chat error:", error);
-           }
-         }
+          }
+        }
 
         if (options.onError) {
           options.onError(error as Error);
         }
-
       } finally {
         setIsStreaming(false);
       }
     },
-    [options]
+    [options],
   );
 
   const abort = useCallback(() => {
