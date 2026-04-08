@@ -12,7 +12,7 @@ import { useTransition } from "react";
 
 interface ChatInputProps {
   handleSubmit: (input: string) => Promise<void>;
-  handleAbort: () => void;
+  handleAbort?: () => void;
   isStreaming: boolean;
 }
 
@@ -39,7 +39,7 @@ export const ChatInput = memo(function ChatInput({
         }, 0);
       });
     },
-    [localInput, isStreaming, handleSubmit]
+    [localInput, isStreaming, handleSubmit],
   );
 
   // Auto-resize textarea
@@ -58,7 +58,7 @@ export const ChatInput = memo(function ChatInput({
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setLocalInput(e.target.value);
     },
-    []
+    [],
   );
 
   // Handle Enter key for submission (Shift+Enter for new line)
@@ -69,7 +69,7 @@ export const ChatInput = memo(function ChatInput({
         onSubmit(e as unknown as FormEvent);
       }
     },
-    [onSubmit]
+    [onSubmit],
   );
 
   return (
@@ -101,6 +101,7 @@ export const ChatInput = memo(function ChatInput({
             type="button"
             className=" p-2 pr-4 rounded-md text-gray-700 hover:text-gray-500 hover:bg-gray-100 disabled:hover:bg-transparent disabled:opacity-40"
             aria-label="Abort"
+            disabled={!handleAbort}
             onClick={handleAbort}
           >
             <CircleStop size={30} className="rotate-90" />

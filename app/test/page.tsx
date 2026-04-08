@@ -1,11 +1,11 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import rehypeHighlight from 'rehype-highlight'; // optional for code highlight
-import 'highlight.js/styles/github.css'; // or any style you like
-import 'katex/dist/katex.min.css';
-import { CollapsibleLine } from '../../components/CollapsibleLine';
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import rehypeHighlight from "rehype-highlight"; // optional for code highlight
+import "highlight.js/styles/github.css"; // or any style you like
+import "katex/dist/katex.min.css";
+import { CollapsibleLine } from "../../components/CollapsibleLine";
 
 const message = `
 
@@ -85,7 +85,10 @@ xxx
 
 function normalizeMathMarkdown(markdown: string): string {
   // const text = markdown.replace(/(^|[\n\r]\s*)\\\[(.*?)\\\]($|[\n\r])/gs, (_, prefix, inside, suffix) => `${prefix}$$${inside}$$${suffix}`);
-  const text = markdown.replace(/\\\[(.*?)\\\]/gs, (_, inside) => `$$${inside}$$`);
+  const text = markdown.replace(
+    /\\\[(.*?)\\\]/gs,
+    (_, inside) => `$$${inside}$$`,
+  );
   console.log(text);
   return text;
 }
@@ -94,11 +97,10 @@ export default function Test() {
   return (
     <main className="flex min-h-screen flex-col items-center m-8 p-4 sm:p-8 md:p-24 bg-gray-50">
       <div className="p-20 m-20 max-w-none bg-gray-100">
-        <CollapsibleLine heading="Hello">
+        <CollapsibleLine heading="Hello" isOpen={false} isShimmering={false}>
           <p>
-            This is the content of the collapsible line.
-            This is the content of the collapsible line.
-            This is the content of the collapsible line.
+            This is the content of the collapsible line. This is the content of
+            the collapsible line. This is the content of the collapsible line.
             This is the content of the collapsible line.
           </p>
         </CollapsibleLine>

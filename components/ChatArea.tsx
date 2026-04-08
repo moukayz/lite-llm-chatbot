@@ -4,12 +4,11 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { defaultSystemPrompt } from "../config/systemPrompt";
 import { ChatInput } from "./ChatInput";
 import { ChatMessages } from "./ChatMessages";
-import { ChatSettings, Message, Model } from "../types/chat";
+import { ChatSettings, Message, Model, ChatSession } from "../types/chat";
 import { useChat, MessageChunk } from "../hooks/useChat";
 import { Sidebar } from "./Sidebar";
 import { DebugPanel } from "./DebugPanel";
 import { Menu } from "lucide-react";
-import { ChatSession } from "./ChatHistory";
 import {
   createChatSession,
   fetchChatSessions,
@@ -74,10 +73,6 @@ export const ChatArea = React.memo(function ChatArea() {
     availableModels: availableModels,
   });
 
-  const updateChatSettings = (updates: Partial<ChatSettings>) => {
-    setChatSettings((prev) => ({ ...prev, ...updates }));
-  };
-
   const isNewMessageRef = useRef<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
@@ -115,22 +110,6 @@ export const ChatArea = React.memo(function ChatArea() {
     console.log("loadChatSessions");
     loadChatSessions();
   }, [activeChatId]);
-
-  // Handle chat session selection
-  const handleSelectChat = async (chatId: string) => {
-    if (chatId === activeChatId) return;
-
-    try {
-      setActiveChatId(chatId);
-      const sessionMessages = await fetchChatSessionMessages(chatId);
-      setMessages(sessionMessages);
-    } catch (error) {
-      console.error(
-        `Failed to load messages for chat session ${chatId}:`,
-        error,
-      );
-    }
-  };
 
   // Create a new chat session
   const handleNewChat = async () => {
@@ -253,14 +232,9 @@ export const ChatArea = React.memo(function ChatArea() {
     <div className="w-full flex flex-row relative h-full overflow-hidden">
       {/* Sidebar - Always render but translate when hidden */}
       <Sidebar
-        chatSettings={chatSettings}
-        updateChatSettings={updateChatSettings}
         isSidebarVisible={showSidebar}
         setSidebarVisible={setShowSidebar}
-        handleNewChat={handleNewChat}
-        chatSessions={chatSessions}
         activeChatId={activeChatId}
-        onSelectChat={handleSelectChat}
       />
 
       {/* Overlay to capture clicks when sidebar is shown on mobile */}
