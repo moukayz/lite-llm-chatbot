@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
+    "postinstall": "prisma generate",
     "db:setup": "tsx app/scripts/setupDb.ts"
   },
   "dependencies": {
